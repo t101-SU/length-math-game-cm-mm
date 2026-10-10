@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>長度探險隊：公分與毫米大冒險 (小學三年級數學)</title>
+  <!-- Tailwind CSS CDN (支援 GitHub Pages 與全球公網存取) -->
+  <script src="https://cdn.tailwindcss.com" onerror="this.onerror=null;this.src='https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js'"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&family=Noto+Sans+TC:wght@400;600;800&display=swap');
+    
+    :root {
+      --font-cute: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-cute);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .bubble-btn {
+      transition: all 0.15s ease-in-out;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+    }
+    .bubble-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .card-shadow {
+      box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+    }
+
+    /* 直式借位 / 進位劃斜線效果 (模擬課本斜線劃掉) */
+    .strikethrough-diag {
+      position: relative;
+      display: inline-block;
+      padding: 0 4px;
+    }
+    .strikethrough-diag::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -8%;
+      width: 116%;
+      height: 2.5px;
+      background-color: #ef4444;
+      transform: translateY(-50%) rotate(-30deg);
+      pointer-events: none;
+    }
+
+    /* 尺標刻度樣式 */
+    .ruler-container {
+      background: #fef08a;
+      border: 3px solid #ca8a04;
+      border-radius: 8px;
+      position: relative;
+      height: 90px;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    @keyframes bounce-gentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .animate-bounce-gentle {
+      animation: bounce-gentle 2s infinite ease-in-out;
+    }
+
+    @keyframes pop-in {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop-in {
+      animation: pop-in 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body class="bg-amber-50 text-slate-800 min-h-screen pb-16 flex flex-col">
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- 頂部導航欄 -->
+  <header class="bg-white border-b-4 border-amber-300 sticky top-0 z-40 px-4 py-3 shadow-sm">
+    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- 標題與吉祥物 -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('adventure')">
+        <div class="w-11 h-11 bg-amber-400 rounded-2xl flex items-center justify-center text-2xl shadow-inner animate-bounce-gentle">
+          📏
+        </div>
+        <div>
+          <h1 class="text-xl md:text-2xl font-black text-amber-900 tracking-tight flex items-center gap-2">
+            長度探險隊
+            <span class="text-xs font-bold bg-amber-200 text-amber-800 px-2.5 py-0.5 rounded-full border border-amber-400">小三數學：公分與毫米</span>
+          </h1>
+          <p class="text-xs text-slate-500 font-medium">單一單位 ⚡ 複合單位直式 📐 步驟換算大解密！</p>
+        </div>
+      </div>
+
+      <!-- 右側功能：星星得分、音效開關 -->
+      <div class="flex items-center gap-2">
+        <div class="bg-amber-100 text-amber-900 px-3 py-1.5 rounded-xl border border-amber-300 flex items-center gap-1.5 font-bold text-sm shadow-sm">
+          <span>⭐</span>
+          <span id="starScore">0</span>
+          <span class="text-xs text-amber-700">顆星</span>
+        </div>
+
+        <button id="soundToggleBtn" onclick="toggleSound()" class="bubble-btn bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl text-lg border border-slate-300" title="切換音效">
+          🔊
+        </button>
+      </div>
+    </div>
+
+    <!-- 標籤分頁列 -->
+    <div class="max-w-5xl mx-auto mt-2 flex gap-2 overflow-x-auto pb-1 pt-1 scrollbar-none">
+      <button id="nav-adventure" onclick="switchTab('adventure')" class="tab-btn bubble-btn px-4 py-2 rounded-xl text-sm font-bold bg-amber-500 text-white flex items-center gap-1.5 shadow">
+        <span>🗺️</span> 課本闖關挑戰 (8關)
+      </button>
+      <button id="nav-endless" onclick="switchTab('endless')" class="tab-btn bubble-btn px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-700 hover:bg-amber-100 border border-amber-200 flex items-center gap-1.5">
+        <span>🎲</span> 無限隨機練功房
+      </button>
+      <button id="nav-ruler" onclick="switchTab('ruler')" class="tab-btn bubble-btn px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-700 hover:bg-amber-100 border border-amber-200 flex items-center gap-1.5">
+        <span>🔍</span> 魔法互動直尺實驗室
+      </button>
+      <button id="nav-cheatsheet" onclick="switchTab('cheatsheet')" class="tab-btn bubble-btn px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-700 hover:bg-amber-100 border border-amber-200 flex items-center gap-1.5">
+        <span>💡</span> 解題策略秘笈本
+      </button>
+    </div>
+  </header>
+
+  <!-- 主內容區域 -->
+  <main class="max-w-5xl mx-auto w-full px-4 pt-6 flex-grow">
+
+    <!-- ========================================== -->
+    <!-- 1. 課本闖關挑戰模式 (Adventure Mode) -->
+    <!-- ========================================== -->
+    <section id="adventureSection" class="space-y-6">
+      
+      <!-- 關卡選擇進度條卡片 -->
+      <div class="bg-white rounded-2xl p-4 card-shadow border-2 border-amber-200">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-bold text-slate-600 flex items-center gap-1">
+            <span>🚩</span> 課本情境冒險地圖
+          </span>
+          <span id="progressText" class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-300">
+            完成度 0 / 8
+          </span>
+        </div>
+        <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="levelButtonsContainer">
+          <!-- 動態由 JavaScript 生成 1~8 關卡按鈕 -->
+        </div>
+      </div>
+
+      <!-- 核心作答區塊 (題目卡片) -->
+      <div id="gamePlayCard" class="bg-white rounded-3xl p-5 md:p-7 card-shadow border-4 border-amber-300 relative overflow-hidden">
+        
+        <!-- 題目情境標頭 -->
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-amber-100 pb-3 mb-4">
+          <div class="flex items-center gap-2">
+            <span id="levelBadge" class="bg-amber-500 text-white font-black text-sm px-3 py-1 rounded-full shadow-sm">
+              第 1 關
+            </span>
+            <span id="levelTopic" class="font-extrabold text-slate-700 text-base md:text-lg">
+              紅色與藍色蠟筆
+            </span>
+          </div>
+          <div id="unitTypeTag" class="text-xs font-bold bg-sky-100 text-sky-800 border border-sky-300 px-2.5 py-1 rounded-lg">
+            單一單位 ⇄ 複合單位
+          </div>
+        </div>
+
+        <!-- 題目情境描述與插圖 -->
+        <div class="grid md:grid-cols-12 gap-5 items-center mb-6">
+          <div class="md:col-span-8 space-y-3">
+            <div id="problemStatement" class="text-lg md:text-xl font-bold text-slate-800 leading-relaxed bg-amber-50/70 p-4 rounded-2xl border border-amber-200">
+              <!-- 題目內容 -->
+            </div>
+            <!-- 小提示氣泡 -->
+            <div class="flex items-start gap-2 bg-blue-50 border border-blue-200 text-blue-900 text-xs md:text-sm p-3 rounded-xl">
+              <span class="text-lg">🤖</span>
+              <div id="helperPrompt" class="leading-relaxed">
+                仔細看題目問的是「毫米」還是「幾公分幾毫米」喔！
+              </div>
+            </div>
+          </div>
+
+          <!-- 情境視覺圖 (SVG動態繪製，如蠟筆、玩偶路徑、杯子、番茄苗、緞帶等) -->
+          <div class="md:col-span-4 flex flex-col items-center justify-center p-3 bg-gradient-to-b from-slate-50 to-amber-50 rounded-2xl border-2 border-dashed border-amber-300 min-h-[140px]" id="visualDiagramBox">
+            <!-- 視覺圖形插槽 -->
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- 學習導引三步驟 (Scaffolded Interactive Steps) -->
+        <!-- ============================================== -->
+
+        <!-- 【步驟一：策略思考與單位判斷】 -->
+        <div id="step1Container" class="mb-6 p-4 md:p-5 rounded-2xl bg-amber-50/90 border-2 border-amber-300 shadow-sm">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-7 h-7 bg-amber-500 text-white font-black rounded-full flex items-center justify-center text-sm shadow-sm">1</span>
+            <h3 class="font-bold text-base md:text-lg text-amber-950">
+              【策略判斷】面對這題，你想要用哪一種策略記錄與計算？
+            </h3>
+          </div>
+          <p class="text-xs text-amber-800 mb-3 font-medium">
+            👇 請點選下方的解題策略，下方步驟將為你即時變身為該策略的<strong>專屬換算與直式格式</strong>！
+          </p>
+
+          <div class="grid sm:grid-cols-2 gap-3" id="strategyOptions">
+            <!-- 由 JS 填充按鈕 -->
+          </div>
+          <div id="strategyFeedback" class="mt-3 text-xs md:text-sm font-bold hidden p-3 rounded-xl animate-pop-in">
+            <!-- 策略反饋說明 -->
+          </div>
+        </div>
+
+        <!-- 【步驟二：單位換算解鎖台 (Unit Conversion Workbench)】 -->
+        <div id="step2Container" class="mb-6 p-4 md:p-5 rounded-2xl bg-sky-50 border-2 border-sky-300 transition-all opacity-40 pointer-events-none shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 bg-sky-500 text-white font-black rounded-full flex items-center justify-center text-sm shadow-sm">2</span>
+              <h3 class="font-bold text-base md:text-lg text-sky-950" id="step2Title">
+                【換算步驟】將所需的單位進行轉換拆解（1公分 = 10毫米）
+              </h3>
+            </div>
+            <span id="step2Badge" class="text-xs bg-sky-200 text-sky-800 font-bold px-2 py-0.5 rounded border border-sky-300">
+              換算準備
+            </span>
+          </div>
+
+          <!-- 換算公式互動卡 -->
+          <div id="conversionCardContent" class="space-y-3">
+            <!-- 動態換算步驟卡片 -->
+          </div>
+        </div>
+
+        <!-- 【步驟三：動態直式紀錄板 (Calculation Slate - 依策略精準切換)】 -->
+        <div id="step3Container" class="mb-6 p-4 md:p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-300 transition-all opacity-40 pointer-events-none shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 bg-emerald-600 text-white font-black rounded-full flex items-center justify-center text-sm shadow-sm">3</span>
+              <h3 class="font-bold text-base md:text-lg text-emerald-950" id="step3Title">
+                【動態算式板】課本標準直式紀錄格式
+              </h3>
+            </div>
+            <span id="currentCalcMethodTag" class="text-xs bg-emerald-200 text-emerald-800 font-bold px-2.5 py-1 rounded-lg border border-emerald-300">
+              複合式單位紀錄格式
+            </span>
+          </div>
+
+          <!-- 橫式與直式展示面板 (完全比照課本格式) -->
+          <div id="calculationBoard" class="bg-white p-4 md:p-6 rounded-2xl border-2 border-emerald-200 shadow-inner">
+            <!-- 課本複合式直式 / 單一單位直式由 JS 精準注入 -->
+          </div>
+
+          <!-- 最終答案填寫與送出區 -->
+          <div class="mt-5 pt-4 border-t-2 border-emerald-200 flex flex-wrap items-center justify-between gap-3 bg-emerald-100/40 p-3 rounded-xl">
+            <div class="flex items-center flex-wrap gap-2">
+              <span class="font-extrabold text-slate-800 text-sm md:text-base">📝 送出最終回答：</span>
+              <div id="answerInputGroup" class="flex items-center flex-wrap gap-1.5">
+                <!-- 動態 input -->
+              </div>
+            </div>
+
+            <button id="submitAnswerBtn" onclick="checkFinalAnswer()" class="bubble-btn bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-2.5 rounded-xl text-base shadow-md flex items-center gap-2">
+              <span>🚀</span> 檢查答案
+            </button>
+          </div>
+        </div>
+
+        <!-- 解題完成反饋筆記本 (Victory Breakdown Notebook) -->
+        <div id="solutionNotebook" class="hidden mt-6 p-5 rounded-2xl bg-gradient-to-r from-amber-100 via-orange-50 to-yellow-100 border-2 border-amber-400 animate-pop-in shadow-md">
+          <div class="flex items-center justify-between mb-3 border-b-2 border-amber-300 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl animate-bounce">🎉</span>
+              <h4 class="font-black text-lg md:text-xl text-amber-900">太棒了！答對了！完整解題筆記：</h4>
+            </div>
+            <button onclick="goToNextLevel()" class="bubble-btn bg-amber-500 hover:bg-amber-600 text-white font-black px-4 py-2 rounded-xl text-sm flex items-center gap-1.5 shadow">
+              <span>下一關 ➔</span>
+            </button>
+          </div>
+          <div id="notebookContent" class="space-y-2 text-sm text-slate-700 font-medium">
+            <!-- 詳細完整步驟列出 -->
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 2. 無限隨機練功房 (Endless Random Practice) -->
+    <!-- ========================================== -->
+    <section id="endlessSection" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 card-shadow border-4 border-indigo-200">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-indigo-100 pb-4 mb-5">
+          <div>
+            <h2 class="text-2xl font-black text-indigo-900 flex items-center gap-2">
+              <span>🎲</span> 隨機長度挑戰練功房
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">隨機生成各種長度加減、換算、進位與借位題型，練習百發百中！</p>
+          </div>
+          <button onclick="generateRandomProblem()" class="bubble-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl text-sm shadow flex items-center gap-1.5">
+            <span>🔄</span> 抽一題新題目
+          </button>
+        </div>
+
+        <div id="endlessProblemContainer">
+          <!-- 動態掛載題目卡片 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 3. 魔法互動直尺實驗室 (Interactive Ruler Lab) -->
+    <!-- ========================================== -->
+    <section id="rulerSection" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 card-shadow border-4 border-amber-300">
+        <div class="border-b-2 border-amber-100 pb-4 mb-5">
+          <h2 class="text-2xl font-black text-amber-900 flex items-center gap-2">
+            <span>🔍</span> 魔法互動直尺：動手看刻度
+          </h2>
+          <p class="text-sm text-slate-600 mt-1">
+            小學三年級最核心觀念：<strong class="text-amber-700 font-black">1 公分 = 10 毫米</strong>。拖曳滑桿，看公分與毫米如何互相變身！
+          </p>
+        </div>
+
+        <div class="bg-amber-50 p-5 rounded-2xl border border-amber-200 mb-6">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div class="flex items-center gap-3">
+              <label for="rulerRange" class="font-bold text-slate-700">調整長度：</label>
+              <input type="range" id="rulerRange" min="0" max="150" value="48" step="1" 
+                     class="w-48 sm:w-72 accent-amber-500 cursor-pointer" oninput="updateRulerLab(this.value)">
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-bold text-slate-600">直接輸入毫米：</span>
+              <input type="number" id="rulerNumberInput" min="0" max="150" value="48" 
+                     class="w-20 px-2 py-1 text-center font-bold border-2 border-amber-300 rounded-lg text-lg"
+                     onchange="updateRulerLab(this.value)">
+              <span class="font-bold text-slate-700">毫米 (mm)</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-xl border-2 border-sky-300 text-center shadow-sm">
+              <span class="text-xs font-bold bg-sky-100 text-sky-800 px-2.5 py-0.5 rounded-full">⚡ 單一單位</span>
+              <div class="text-3xl font-black text-sky-600 my-2" id="labSingleUnit">
+                48 <span class="text-base text-slate-600 font-bold">毫米 (mm)</span>
+              </div>
+              <p class="text-xs text-slate-500">全部用最小單位「毫米」表示</p>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border-2 border-emerald-300 text-center shadow-sm">
+              <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">📐 複合單位</span>
+              <div class="text-3xl font-black text-emerald-600 my-2" id="labCompoundUnit">
+                4 <span class="text-base text-slate-600 font-bold">公分</span> 8 <span class="text-base text-slate-600 font-bold">毫米</span>
+              </div>
+              <p class="text-xs text-slate-500">拆成「整公分」與「不滿1公分的毫米」</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-500 px-1">
+            <span>0 cm (起點)</span>
+            <span class="text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">💡 每一大格是 1 公分，裡面有 10 個小格 (毫米)</span>
+            <span>15 cm (終點)</span>
+          </div>
+
+          <div class="ruler-container p-2 flex flex-col justify-end relative shadow-md" id="interactiveRuler">
+            <!-- SVG 直尺由 JS 繪製 -->
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+          <h4 class="font-bold text-sm text-slate-700 mb-2">生活中的常見物品大約多長？</h4>
+          <div class="flex flex-wrap gap-2 text-xs font-bold">
+            <button onclick="updateRulerLab(1)" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg hover:bg-amber-100">
+              🪙 1元硬幣厚度 (約 1 毫米)
+            </button>
+            <button onclick="updateRulerLab(10)" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg hover:bg-amber-100">
+              🪙 10枚1元硬幣疊起 (10 毫米 = 1公分)
+            </button>
+            <button onclick="updateRulerLab(48)" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg hover:bg-amber-100">
+              🖍️ 紅色蠟筆 (48 毫米 = 4公分8毫米)
+            </button>
+            <button onclick="updateRulerLab(85)" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg hover:bg-amber-100">
+              🪪 學生證長度 (85 毫米 = 8公分5毫米)
+            </button>
+            <button onclick="updateRulerLab(150)" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg hover:bg-amber-100">
+              ✏️ 新鉛筆長度 (150 毫米 = 15公分)
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 4. 解題策略秘笈本 (Cheatsheet) -->
+    <!-- ========================================== -->
+    <section id="cheatsheetSection" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 card-shadow border-4 border-amber-200">
+        <div class="border-b-2 border-amber-100 pb-4 mb-5">
+          <h2 class="text-2xl font-black text-amber-900 flex items-center gap-2">
+            <span>💡</span> 小學三年級：長度計算必勝秘笈
+          </h2>
+          <p class="text-sm text-slate-600 mt-1">
+            如何決定用「單一單位」還是「複合單位」？換算步驟怎麼列才不會算錯？
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-sky-50 p-5 rounded-2xl border-2 border-sky-200 space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">⚡</span>
+              <h3 class="font-extrabold text-sky-900 text-lg">【什麼時候用哪種方式最好？】</h3>
+            </div>
+            
+            <div class="space-y-3 text-sm text-slate-700">
+              <div class="bg-white p-3 rounded-xl border border-sky-200">
+                <span class="font-bold text-sky-700 block mb-1">📐 策略 A：複合單位直式法（推薦情境）</span>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  • 題目給的都是<strong>「幾公分幾毫米」</strong>（例如：6公分3毫米 + 3公分4毫米）。<br>
+                  • <strong>做法：</strong>上方分寫「公分」與「毫米」，把公分對齊公分、毫米對齊毫米，各自相加或相減。<br>
+                  • <strong>注意：</strong>滿 10 毫米要<strong>進位 1 公分</strong>；毫米不夠減時要向公分<strong>借 1 公分變 10 毫米</strong>！
+                </p>
+              </div>
+
+              <div class="bg-white p-3 rounded-xl border border-sky-200">
+                <span class="font-bold text-amber-700 block mb-1">⚡ 策略 B：單一單位法（全換成毫米算）</span>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  • 題目給的都是<strong>「幾毫米」</strong>，或者減法借位容易混亂時。<br>
+                  • <strong>做法：</strong>全部變身成「毫米」直接做三位數加減法，算完後再轉回幾公分幾毫米。<br>
+                  • <strong>好處：</strong>完全不用擔心公分和毫米借位進位會混淆，最不容易算錯！
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-amber-50 p-5 rounded-2xl border-2 border-amber-200 space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🌟</span>
+              <h3 class="font-extrabold text-amber-900 text-lg">【單位換算與進借位口訣】</h3>
+            </div>
+
+            <div class="space-y-2.5 text-sm text-slate-700">
+              <div class="bg-white p-3 rounded-xl border border-amber-200">
+                <span class="font-bold text-amber-800">1. 基本黃金公式：</span>
+                <div class="font-black text-amber-600 text-center text-lg my-1 bg-amber-100 py-1 rounded-lg">
+                  1 公分 = 10 毫米 (mm)
+                </div>
+                <p class="text-xs text-slate-500 text-center">4 公分 = 40 毫米 ； 48 毫米 = 4 公分 8 毫米</p>
+              </div>
+
+              <div class="bg-white p-3 rounded-xl border border-amber-200">
+                <span class="font-bold text-emerald-800">2. 加法進位（算出來先寫，再劃掉進位）：</span>
+                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                  例：4公分9毫米 ＋ 11公分5毫米<br>
+                  • 毫米先算：9 ＋ 5 ＝ <strong>14</strong>，先寫在橫線下。<br>
+                  • 公分先算：4 ＋ 11 ＝ <strong>15</strong>，先寫在橫線下。<br>
+                  • <strong>進位劃掉：</strong>14 毫米是 1 公分 4 毫米，將 <strong>14 劃掉</strong>改寫 4；將 <strong>15 劃掉</strong>加上進位的 1 改寫 16！<br>
+                  👉 答案就是 <strong>16 公分 4 毫米</strong>。
+                </p>
+              </div>
+
+              <div class="bg-white p-3 rounded-xl border border-amber-200">
+                <span class="font-bold text-rose-800">3. 減法借位（借 1 當 10）：</span>
+                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                  • 6 毫米減 8 毫米不夠減！<br>
+                  • 向 20 公分借 1 公分（20剩19），借來的 1 公分變成 <strong>10 毫米</strong>。<br>
+                  • 現在毫米有：10 ＋ 6 ＝ <strong>16</strong>。<br>
+                  • 毫米相減：16 － 8 ＝ <strong>8</strong> ； 公分相減：19 － 18 ＝ <strong>1</strong>。<br>
+                  👉 答案就是 <strong>1 公分 8 毫米</strong>。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="mt-8 text-center text-xs text-slate-400 py-4 border-t border-amber-200 max-w-5xl mx-auto w-full">
+    國小三年級數學《長度的計算》專用互動輔助教材 • 嚴格對標教育部課本複合式單位紀錄格式
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- JavaScript: 雙策略動態直式引擎、換算拆解、音效與題庫邏輯 -->
+  <!-- ============================================================== -->
+  <script>
+    /* -------------------------------------------------------------
+     * 1. 課本題庫 (數據標準化：支援雙向動態生成複合式與單一單位直式)
+     * ------------------------------------------------------------- */
+    const textbookLevels = [
+      {
+        id: 1,
+        title: "蠟筆比長短",
+        tag: "加法運算與換算",
+        story: "紅色蠟筆長 <span class='text-rose-600 font-black'>48 毫米</span>，藍色蠟筆比紅色蠟筆長 <span class='text-blue-600 font-black'>19 毫米</span>。<br>藍色蠟筆長多少毫米？也可以說是幾公分幾毫米？",
+        helper: "題目給的都是毫米，可以先算總毫米再換算，也可以先換算成公分毫米列直式！",
+        diagram: "crayons",
+        c1: 4, m1: 8, totalMm1: 48, origFormat1: "48 毫米",
+        c2: 1, m2: 9, totalMm2: 19, origFormat2: "19 毫米",
+        operator: "+",
+        recommendedStrategy: "single",
+        strategyRationale: "原本都是毫米，用單一單位先相加最快；但若換成公分毫米直式，也是非常棒的標準做法！",
+        answerType: "both_required"
+      },
+      {
+        id: 2,
+        title: "發條玩偶走地圖",
+        tag: "複合單位直接加法 (不進位)",
+        story: "發條玩偶從甲地出發，經過乙地到丙地。<br>甲地到乙地長 <span class='text-amber-700 font-black'>6公分3毫米</span>，乙地到丙地長 <span class='text-amber-700 font-black'>3公分4毫米</span>。一共走了幾公分幾毫米？",
+        helper: "兩個都是「幾公分幾毫米」，用複合單位直式公分對齊公分、毫米對齊毫米算最快！",
+        diagram: "doll_path",
+        c1: 6, m1: 3, totalMm1: 63, origFormat1: "6公分3毫米",
+        c2: 3, m2: 4, totalMm2: 34, origFormat2: "3公分4毫米",
+        operator: "+",
+        recommendedStrategy: "compound",
+        strategyRationale: "兩個都是「幾公分幾毫米」，直接採用複合單位直式紀錄最省時、最清晰！",
+        answerType: "cm_mm"
+      },
+      {
+        id: 3,
+        title: "美味漂浮紅茶",
+        tag: "複合單位加法 (滿10進位！)",
+        story: "一杯漂浮紅茶，上面的冰淇淋高 <span class='text-amber-700 font-black'>4公分9毫米</span>，底下的紅茶高 <span class='text-amber-700 font-black'>11公分5毫米</span>。<br>這杯漂浮紅茶的總高度是幾公分幾毫米？",
+        helper: "注意看：9毫米加5毫米等於14毫米，滿10毫米了！要記得進位成1公分喔！",
+        diagram: "tea_cup",
+        c1: 4, m1: 9, totalMm1: 49, origFormat1: "4公分9毫米",
+        c2: 11, m2: 5, totalMm2: 115, origFormat2: "11公分5毫米",
+        operator: "+",
+        recommendedStrategy: "compound",
+        strategyRationale: "使用複合單位直式記錄最直觀，但切記毫米欄相加滿 10 要在公分欄上方標記進位 1！",
+        answerType: "cm_mm"
+      },
+      {
+        id: 4,
+        title: "小番茄苗長高高",
+        tag: "單位不同！(毫米 ➔ 複合單位換算)",
+        story: "番茄苗原來的高度是 <span class='text-emerald-700 font-black'>4公分3毫米</span>，又長高了 <span class='text-emerald-700 font-black'>28毫米</span>後，現在的高度是幾公分幾毫米？",
+        helper: "一個是公分毫米，另一個是毫米！先把 28 毫米換算成「2公分8毫米」再來列直式！",
+        diagram: "tomato_plant",
+        c1: 4, m1: 3, totalMm1: 43, origFormat1: "4公分3毫米",
+        c2: 2, m2: 8, totalMm2: 28, origFormat2: "28毫米",
+        operator: "+",
+        recommendedStrategy: "compound",
+        strategyRationale: "題目問的是幾公分幾毫米，先把 28 毫米換成 2 公分 8 毫米後列直式，最符合題意！",
+        answerType: "cm_mm"
+      },
+      {
+        id: 5,
+        title: "字典與故事書的厚度",
+        tag: "單一單位減法 ➔ 換算",
+        story: "字典的厚度是 <span class='text-amber-800 font-black'>65 毫米</span>，比故事書厚 <span class='text-amber-800 font-black'>42 毫米</span>。<br>故事書的厚度是幾毫米？也可以說是幾公分幾毫米？",
+        helper: "兩個厚度都是毫米，可以直接相減，也可以都換算成公分毫米列直式！",
+        diagram: "books",
+        c1: 6, m1: 5, totalMm1: 65, origFormat1: "65毫米",
+        c2: 4, m2: 2, totalMm2: 42, origFormat2: "42毫米",
+        operator: "-",
+        recommendedStrategy: "single",
+        strategyRationale: "題目原本都用毫米表示，直接用單一單位(毫米)相減最快；換成公分毫米直式也完全通順！",
+        answerType: "both_required"
+      },
+      {
+        id: 6,
+        title: "手作課剪棉繩",
+        tag: "複合單位直接減法 (不借位)",
+        story: "一條長 <span class='text-indigo-700 font-black'>12公分7毫米</span> 的棉繩，剪掉 <span class='text-indigo-700 font-black'>5公分3毫米</span> 後，還剩下幾公分幾毫米？",
+        helper: "7毫米夠減3毫米，12公分夠減5公分，用直式分開減最輕鬆！",
+        diagram: "rope_cut",
+        c1: 12, m1: 7, totalMm1: 127, origFormat1: "12公分7毫米",
+        c2: 5, m2: 3, totalMm2: 53, origFormat2: "5公分3毫米",
+        operator: "-",
+        recommendedStrategy: "compound",
+        strategyRationale: "都是複合單位，而且毫米夠減（7 > 3），不用向公分借位，直接直式相減最快！",
+        answerType: "cm_mm"
+      },
+      {
+        id: 7,
+        title: "禮物盒的漂亮緞帶",
+        tag: "複合單位減法 (借位挑戰！)",
+        story: "紅色緞帶長 <span class='text-rose-600 font-black'>20公分6毫米</span>，藍色緞帶長 <span class='text-blue-600 font-black'>18公分8毫米</span>。<br>藍色緞帶比紅色緞帶短幾公分幾毫米？",
+        helper: "注意！6毫米比8毫米小，不夠減！要向20公分借1公分變成10毫米喔！",
+        diagram: "ribbons",
+        c1: 20, m1: 6, totalMm1: 206, origFormat1: "20公分6毫米",
+        c2: 18, m2: 8, totalMm2: 188, origFormat2: "18公分8毫米",
+        operator: "-",
+        recommendedStrategy: "compound",
+        strategyRationale: "複合單位直式最直觀，但一定要記得『向公分借 1 變 10 毫米』的借位劃線魔法！",
+        answerType: "cm_mm"
+      },
+      {
+        id: 8,
+        title: "色鉛筆與彩色筆大對決",
+        tag: "混合單位比較 (展示兩種解法！)",
+        story: "一枝色鉛筆長 <span class='text-amber-800 font-black'>15公分2毫米</span>，一枝彩色筆長 <span class='text-purple-700 font-black'>95毫米</span>。<br>一枝色鉛筆比彩色筆長幾公分幾毫米？",
+        helper: "一個是15公分2毫米，一個是95毫米。換算後再比比看！",
+        diagram: "pencils",
+        c1: 15, m1: 2, totalMm1: 152, origFormat1: "15公分2毫米",
+        c2: 9, m2: 5, totalMm2: 95, origFormat2: "95毫米",
+        operator: "-",
+        recommendedStrategy: "both",
+        strategyRationale: "兩種方法都可以！選複合單位直式或全換毫米法，系統都會精準呈現！",
+        answerType: "cm_mm"
+      }
+    ];
+
+    /* -------------------------------------------------------------
+     * 2. 全域狀態變數
+     * ------------------------------------------------------------- */
+    let currentLevelIndex = 0;
+    let completedLevels = new Set();
+    let totalStars = 0;
+    let soundEnabled = true;
+    let activeTab = "adventure";
+    let isEndlessMode = false;
+    let currentProblem = textbookLevels[0];
+    let selectedStrategy = null; // "compound" 或 "single"
+
+    /* -------------------------------------------------------------
+     * 3. Web Audio API 音效合成器
+     * ------------------------------------------------------------- */
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+
+        if (type === 'click') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'correct') {
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+            gain.gain.setValueAtTime(0.12, now + idx * 0.09);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.09 + 0.18);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.09);
+            osc.stop(now + idx * 0.09 + 0.18);
+          });
+        } else if (type === 'wrong') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.linearRampToValueAtTime(170, now + 0.25);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'magic') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.25);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        }
+      } catch (e) {
+        console.warn("Audio error:", e);
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById("soundToggleBtn").textContent = soundEnabled ? "🔊" : "🔇";
+      playSound('click');
+    }
+
+    /* -------------------------------------------------------------
+     * 4. 勝利彩色紙花特效 (Canvas Confetti)
+     * ------------------------------------------------------------- */
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const confettiCtx = confettiCanvas.getContext('2d');
+    let confettiParticles = [];
+
+    function resizeCanvas() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function triggerConfetti() {
+      const colors = ['#f59e0b', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6', '#ef4444'];
+      for (let i = 0; i < 70; i++) {
+        confettiParticles.push({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.7) * 16,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotationSpeed: (Math.random() - 0.5) * 10,
+          opacity: 1
+        });
+      }
+    }
+
+    function renderConfetti() {
+      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      for (let i = confettiParticles.length - 1; i >= 0; i--) {
+        const p = confettiParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.3;
+        p.rotation += p.rotationSpeed;
+        p.opacity -= 0.015;
+
+        if (p.opacity <= 0) {
+          confettiParticles.splice(i, 1);
+          continue;
+        }
+
+        confettiCtx.save();
+        confettiCtx.translate(p.x, p.y);
+        confettiCtx.rotate((p.rotation * Math.PI) / 180);
+        confettiCtx.fillStyle = p.color;
+        confettiCtx.globalAlpha = p.opacity;
+        confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        confettiCtx.restore();
+      }
+      requestAnimationFrame(renderConfetti);
+    }
+    renderConfetti();
+
+    /* -------------------------------------------------------------
+     * 5. 分頁切換
+     * ------------------------------------------------------------- */
+    function switchTab(tabId) {
+      playSound('click');
+      activeTab = tabId;
+
+      const tabs = ['adventure', 'endless', 'ruler', 'cheatsheet'];
+      tabs.forEach(t => {
+        const sec = document.getElementById(`${t}Section`);
+        const btn = document.getElementById(`nav-${t}`);
+        if (t === tabId) {
+          sec.classList.remove('hidden');
+          btn.classList.add('bg-amber-500', 'text-white', 'shadow');
+          btn.classList.remove('bg-white', 'text-slate-700');
+        } else {
+          sec.classList.add('hidden');
+          btn.classList.remove('bg-amber-500', 'text-white', 'shadow');
+          btn.classList.add('bg-white', 'text-slate-700');
+        }
+      });
+
+      if (tabId === 'ruler') {
+        drawInteractiveRuler();
+      }
+    }
+
+    /* -------------------------------------------------------------
+     * 6. 關卡切換與渲染
+     * ------------------------------------------------------------- */
+    function renderLevelButtons() {
+      const container = document.getElementById('levelButtonsContainer');
+      container.innerHTML = '';
+      textbookLevels.forEach((lvl, idx) => {
+        const btn = document.createElement('button');
+        const isCurrent = idx === currentLevelIndex;
+        const isDone = completedLevels.has(idx);
+
+        let bgClass = "bg-slate-100 text-slate-600 border-slate-300";
+        if (isCurrent) {
+          bgClass = "bg-amber-500 text-white border-amber-600 ring-2 ring-amber-300 ring-offset-1 font-black";
+        } else if (isDone) {
+          bgClass = "bg-emerald-100 text-emerald-800 border-emerald-400 font-bold";
+        }
+
+        btn.className = `bubble-btn p-2 rounded-xl text-center border text-xs sm:text-sm flex flex-col items-center justify-center transition-all ${bgClass}`;
+        btn.innerHTML = `
+          <span class="text-xs">${isDone ? '✅' : (isCurrent ? '⭐' : '🔒')}</span>
+          <span>第${lvl.id}關</span>
+        `;
+        btn.onclick = () => selectLevel(idx);
+        container.appendChild(btn);
+      });
+
+      document.getElementById('progressText').textContent = `完成度 ${completedLevels.size} / ${textbookLevels.length}`;
+    }
+
+    function selectLevel(index) {
+      playSound('click');
+      currentLevelIndex = index;
+      isEndlessMode = false;
+      currentProblem = textbookLevels[index];
+      renderLevelButtons();
+      loadProblemIntoUI(currentProblem);
+    }
+
+    function goToNextLevel() {
+      playSound('click');
+      if (currentLevelIndex < textbookLevels.length - 1) {
+        selectLevel(currentLevelIndex + 1);
+      } else {
+        alert("🎉 恭喜你完成所有課本關卡！現在可以前往【無限隨機練功房】或【直尺實驗室】繼續探索喔！");
+        switchTab('endless');
+        generateRandomProblem();
+      }
+    }
+
+    /* -------------------------------------------------------------
+     * 7. 載入題目至作答介面
+     * ------------------------------------------------------------- */
+    function loadProblemIntoUI(prob) {
+      selectedStrategy = null;
+
+      document.getElementById('levelBadge').textContent = typeof prob.id === 'number' ? `第 ${prob.id} 關` : prob.id;
+      document.getElementById('levelTopic').textContent = prob.title;
+      document.getElementById('unitTypeTag').textContent = prob.tag;
+      document.getElementById('problemStatement').innerHTML = prob.story;
+      document.getElementById('helperPrompt').textContent = prob.helper;
+
+      renderDiagramSVG(prob.diagram, document.getElementById('visualDiagramBox'));
+
+      // 重設步驟面板狀態
+      const s1 = document.getElementById('step1Container');
+      const s2 = document.getElementById('step2Container');
+      const s3 = document.getElementById('step3Container');
+      const note = document.getElementById('solutionNotebook');
+
+      s1.classList.remove('hidden');
+      s2.classList.add('opacity-40', 'pointer-events-none');
+      s3.classList.add('opacity-40', 'pointer-events-none');
+      note.classList.add('hidden');
+
+      renderStrategyOptions(prob);
+      renderAnswerInputs(prob);
+
+      // 清空舊步驟內容，等待學生點選策略
+      document.getElementById('conversionCardContent').innerHTML = `
+        <div class="text-center py-4 text-xs text-sky-700 font-bold bg-white/60 rounded-xl border border-dashed border-sky-300">
+          👆 請先在【步驟一】選擇計算策略，系統將自動展開換算步驟！
+        </div>
+      `;
+      document.getElementById('calculationBoard').innerHTML = `
+        <div class="text-center py-6 text-sm text-emerald-800 font-bold bg-white/60 rounded-xl border border-dashed border-emerald-300">
+          👆 請先在【步驟一】選擇計算策略，系統將在此呈現標準紀錄格式！
+        </div>
+      `;
+    }
+
+    /* -------------------------------------------------------------
+     * 8. 視覺情境插圖
+     * ------------------------------------------------------------- */
+    function renderDiagramSVG(type, container) {
+      let svgHtml = '';
+      if (type === 'crayons') {
+        svgHtml = `
+          <svg width="240" height="90" viewBox="0 0 240 90" class="w-full h-auto max-w-[240px]">
+            <rect x="20" y="15" width="120" height="20" rx="4" fill="#f87171" stroke="#dc2626" stroke-width="2"/>
+            <polygon points="140,15 155,25 140,35" fill="#ef4444"/>
+            <text x="65" y="29" fill="#fff" font-size="11" font-weight="bold">紅蠟筆 48 mm</text>
+            <rect x="20" y="50" width="168" height="20" rx="4" fill="#60a5fa" stroke="#2563eb" stroke-width="2"/>
+            <polygon points="188,50 203,60 188,70" fill="#3b82f6"/>
+            <text x="75" y="64" fill="#fff" font-size="11" font-weight="bold">藍蠟筆比紅長 19 mm</text>
+          </svg>
+        `;
+      } else if (type === 'doll_path') {
+        svgHtml = `
+          <svg width="220" height="80" viewBox="0 0 220 80" class="w-full h-auto max-w-[220px]">
+            <line x1="20" y1="45" x2="200" y2="45" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="20" cy="45" r="7" fill="#ef4444"/>
+            <text x="14" y="65" font-size="11" font-weight="bold" fill="#334155">甲</text>
+            <circle cx="120" cy="45" r="7" fill="#3b82f6"/>
+            <text x="114" y="65" font-size="11" font-weight="bold" fill="#334155">乙</text>
+            <circle cx="200" cy="45" r="7" fill="#10b981"/>
+            <text x="194" y="65" font-size="11" font-weight="bold" fill="#334155">丙</text>
+            <text x="45" y="32" font-size="10" font-weight="bold" fill="#b45309">6cm 3mm</text>
+            <text x="135" y="32" font-size="10" font-weight="bold" fill="#b45309">3cm 4mm</text>
+          </svg>
+        `;
+      } else if (type === 'tea_cup') {
+        svgHtml = `
+          <svg width="180" height="110" viewBox="0 0 180 110" class="w-full h-auto max-w-[180px]">
+            <polygon points="45,25 135,25 125,100 55,100" fill="#fed7aa" stroke="#c2410c" stroke-width="2"/>
+            <polygon points="50,45 130,45 125,100 55,100" fill="#b45309" opacity="0.85"/>
+            <text x="62" y="75" fill="#fef3c7" font-size="10" font-weight="bold">紅茶 11cm 5mm</text>
+            <ellipse cx="90" cy="30" rx="42" ry="16" fill="#fef08a" stroke="#ca8a04" stroke-width="1.5"/>
+            <text x="56" y="28" fill="#854d0e" font-size="10" font-weight="bold">冰淇淋 4cm 9mm</text>
+          </svg>
+        `;
+      } else if (type === 'tomato_plant') {
+        svgHtml = `
+          <svg width="180" height="95" viewBox="0 0 180 95" class="w-full h-auto max-w-[180px]">
+            <rect x="40" y="70" width="100" height="18" rx="4" fill="#78350f"/>
+            <line x1="90" y1="70" x2="90" y2="35" stroke="#15803d" stroke-width="4"/>
+            <circle cx="90" cy="35" r="5" fill="#22c55e"/>
+            <line x1="90" y1="35" x2="90" y2="12" stroke="#4ade80" stroke-width="4" stroke-dasharray="3,2"/>
+            <circle cx="90" cy="12" r="6" fill="#ef4444"/>
+            <text x="105" y="55" font-size="10" font-weight="bold" fill="#166534">原高 4cm 3mm</text>
+            <text x="105" y="24" font-size="10" font-weight="bold" fill="#15803d">+長高 28mm</text>
+          </svg>
+        `;
+      } else if (type === 'ribbons') {
+        svgHtml = `
+          <svg width="220" height="85" viewBox="0 0 220 85" class="w-full h-auto max-w-[220px]">
+            <rect x="15" y="15" width="190" height="18" rx="4" fill="#fb7185" stroke="#e11d48" stroke-width="1.5"/>
+            <text x="25" y="28" fill="#fff" font-size="10" font-weight="bold">紅緞帶 20 公分 6 毫米</text>
+            <rect x="15" y="45" width="165" height="18" rx="4" fill="#60a5fa" stroke="#2563eb" stroke-width="1.5"/>
+            <text x="25" y="58" fill="#fff" font-size="10" font-weight="bold">藍緞帶 18 公分 8 毫米</text>
+          </svg>
+        `;
+      } else {
+        svgHtml = `
+          <div class="text-4xl text-center">📏</div>
+          <span class="text-xs font-bold text-slate-500 mt-1">長度量測與換算</span>
+        `;
+      }
+      container.innerHTML = svgHtml;
+    }
+
+    /* -------------------------------------------------------------
+     * 9. 步驟一：渲染策略按鈕
+     * ------------------------------------------------------------- */
+    function renderStrategyOptions(prob) {
+      const container = document.getElementById('strategyOptions');
+      const feedback = document.getElementById('strategyFeedback');
+      feedback.className = "mt-3 text-xs md:text-sm font-bold hidden p-3 rounded-xl";
+      container.innerHTML = '';
+
+      const options = [
+        {
+          id: 'compound',
+          name: '📐 複合單位直式法',
+          desc: '上方依「公分」與「毫米」分兩欄對齊記錄，直式計算（進位/借位）。'
+        },
+        {
+          id: 'single',
+          name: '⚡ 單一單位法 (全換毫米)',
+          desc: '全部變身成最小單位「毫米」做加減，算完再換算回公分毫米。'
+        }
+      ];
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.id = `strategy-btn-${opt.id}`;
+        btn.className = "bubble-btn text-left p-3.5 rounded-2xl bg-white border-2 border-amber-200 hover:border-amber-400 flex flex-col gap-1 transition-all";
+        btn.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-black text-base text-slate-800">${opt.name}</span>
+            <span class="text-xs font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full" id="tag-${opt.id}">點擊選擇</span>
+          </div>
+          <span class="text-xs text-slate-500 font-medium leading-relaxed">${opt.desc}</span>
+        `;
+        btn.onclick = () => chooseStrategy(opt.id, prob);
+        container.appendChild(btn);
+      });
+    }
+
+    function chooseStrategy(chosen, prob) {
+      playSound('click');
+      selectedStrategy = chosen;
+
+      // 更新按鈕高亮
+      ['compound', 'single'].forEach(id => {
+        const btn = document.getElementById(`strategy-btn-${id}`);
+        const tag = document.getElementById(`tag-${id}`);
+        if (id === chosen) {
+          btn.className = "bubble-btn text-left p-3.5 rounded-2xl bg-amber-100/80 border-4 border-amber-500 ring-2 ring-amber-300 flex flex-col gap-1 transition-all shadow-md";
+          tag.textContent = "已選定 ⭐";
+          tag.className = "text-xs font-black text-white bg-amber-500 px-2.5 py-0.5 rounded-full";
+        } else {
+          btn.className = "bubble-btn text-left p-3.5 rounded-2xl bg-white border-2 border-slate-200 opacity-70 hover:opacity-100 flex flex-col gap-1 transition-all";
+          tag.textContent = "可切換";
+          tag.className = "text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full";
+        }
+      });
+
+      // 策略反饋提示
+      const feedback = document.getElementById('strategyFeedback');
+      feedback.classList.remove('hidden');
+
+      if (chosen === 'compound') {
+        playSound('magic');
+        feedback.className = "mt-3 text-xs md:text-sm font-bold p-3 rounded-xl bg-sky-100 text-sky-900 border border-sky-300 animate-pop-in";
+        feedback.innerHTML = `
+          🎯 <strong>已切換為【複合單位直式法】！</strong><br>
+          直式上方將標記「公分」與「毫米」專屬欄位，請觀察步驟二的單位換算與步驟三的教科書標準直式格式！
+        `;
+      } else {
+        playSound('magic');
+        feedback.className = "mt-3 text-xs md:text-sm font-bold p-3 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 animate-pop-in";
+        feedback.innerHTML = `
+          ⚡ <strong>已切換為【單一單位法 (全換毫米)】！</strong><br>
+          全部先換算為最小單位「毫米」直接計算，最後再拆解成幾公分幾毫米！
+        `;
+      }
+
+      // 解鎖步驟二與步驟三
+      const s2 = document.getElementById('step2Container');
+      const s3 = document.getElementById('step3Container');
+      s2.classList.remove('opacity-40', 'pointer-events-none');
+      s3.classList.remove('opacity-40', 'pointer-events-none');
+
+      // 核心：依據選定的策略，動態重新渲染步驟二換算卡、步驟三直式看板與最終回答輸入框！
+      renderConversionCards(prob, chosen);
+      renderCalculationSlate(prob, chosen);
+      renderAnswerInputs(prob, chosen);
+    }
+
+    /* -------------------------------------------------------------
+     * 10. 步驟二：依選定策略動態生成換算卡片
+     * ------------------------------------------------------------- */
+    function renderConversionCards(prob, strategy) {
+      const container = document.getElementById('conversionCardContent');
+      const title = document.getElementById('step2Title');
+      const badge = document.getElementById('step2Badge');
+      container.innerHTML = '';
+
+      const { c1, m1, totalMm1, c2, m2, totalMm2, operator: op } = prob;
+      const orig1 = prob.origFormat1 || `${c1}公分${m1}毫米`;
+      const orig2 = prob.origFormat2 || `${c2}公分${m2}毫米`;
+
+      if (strategy === 'compound') {
+        title.textContent = "【換算步驟】將數量整理為幾公分幾毫米（1公分 = 10毫米）";
+        badge.textContent = "複合單位換算";
+
+        let cardsHtml = '';
+        let stepCount = 1;
+
+        // 檢查第一個數是否為純毫米
+        if (orig1.includes('毫米') && !orig1.includes('公分')) {
+          cardsHtml += `
+            <div class="bg-white p-3.5 rounded-xl border border-sky-200 shadow-sm">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="w-5 h-5 bg-sky-500 text-white rounded-full flex items-center justify-center text-xs font-bold">${stepCount++}</span>
+                <span class="font-bold text-sm text-sky-900">將第一項 ${totalMm1} 毫米換算成公分毫米：</span>
+              </div>
+              <div class="bg-sky-50 text-sky-800 font-black text-center py-2 px-3 rounded-lg text-sm md:text-base border border-sky-100 my-1">
+                ${totalMm1} 毫米 = ${c1 * 10} 毫米 + ${m1} 毫米 = <span class="text-blue-600">${c1} 公分 ${m1} 毫米</span>
+              </div>
+              <p class="text-xs text-slate-500 font-medium">因為 10 毫米 = 1 公分，每滿 10 毫米就換成 1 公分。</p>
+            </div>
+          `;
+        }
+
+        // 檢查第二個數是否為純毫米
+        if (orig2.includes('毫米') && !orig2.includes('公分')) {
+          cardsHtml += `
+            <div class="bg-white p-3.5 rounded-xl border border-sky-200 shadow-sm">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="w-5 h-5 bg-sky-500 text-white rounded-full flex items-center justify-center text-xs font-bold">${stepCount++}</span>
+                <span class="font-bold text-sm text-sky-900">將第二項 ${totalMm2} 毫米換算成公分毫米：</span>
+              </div>
+              <div class="bg-sky-50 text-sky-800 font-black text-center py-2 px-3 rounded-lg text-sm md:text-base border border-sky-100 my-1">
+                ${totalMm2} 毫米 = ${c2 * 10} 毫米 + ${m2} 毫米 = <span class="text-blue-600">${c2} 公分 ${m2} 毫米</span>
+              </div>
+              <p class="text-xs text-slate-500 font-medium">將數量轉化為幾公分幾毫米，方便填入直式公分與毫米欄位。</p>
+            </div>
+          `;
+        }
+
+        if (cardsHtml === '') {
+          // 兩者原本就是公分毫米
+          cardsHtml = `
+            <div class="bg-white p-3.5 rounded-xl border border-sky-200 shadow-sm text-center">
+              <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full mb-2 inline-block">齊全不必換算</span>
+              <p class="text-sm font-bold text-slate-700 leading-relaxed">
+                題目給的兩項都是「幾公分幾毫米」：<br>
+                <span class="text-blue-600 font-black">${c1}公分${m1}毫米</span> 與 <span class="text-blue-600 font-black">${c2}公分${m2}毫米</span>。<br>
+                可以直接將公分填入公分欄、毫米填入毫米欄開始計算！
+              </p>
+            </div>
+          `;
+        }
+
+        container.innerHTML = cardsHtml;
+
+      } else {
+        // 單一單位法
+        title.textContent = "【換算步驟】全部變身成最小單位「毫米」（1公分 = 10毫米）";
+        badge.textContent = "單一單位換算";
+
+        let cardsHtml = '';
+        let stepCount = 1;
+
+        if (orig1.includes('公分')) {
+          cardsHtml += `
+            <div class="bg-white p-3.5 rounded-xl border border-amber-200 shadow-sm">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">${stepCount++}</span>
+                <span class="font-bold text-sm text-amber-900">將 ${orig1} 換算成純毫米：</span>
+              </div>
+              <div class="bg-amber-50 text-amber-800 font-black text-center py-2 px-3 rounded-lg text-sm md:text-base border border-amber-100 my-1">
+                ${c1} 公分 ${m1} 毫米 = ${c1 * 10} 毫米 + ${m1} 毫米 = <span class="text-rose-600">${totalMm1} 毫米</span>
+              </div>
+              <p class="text-xs text-slate-500 font-medium">1 公分 = 10 毫米，所以 ${c1} 公分是 ${c1 * 10} 毫米。</p>
+            </div>
+          `;
+        }
+
+        if (orig2.includes('公分')) {
+          cardsHtml += `
+            <div class="bg-white p-3.5 rounded-xl border border-amber-200 shadow-sm">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">${stepCount++}</span>
+                <span class="font-bold text-sm text-amber-900">將 ${orig2} 換算成純毫米：</span>
+              </div>
+              <div class="bg-amber-50 text-amber-800 font-black text-center py-2 px-3 rounded-lg text-sm md:text-base border border-amber-100 my-1">
+                ${c2} 公分 ${m2} 毫米 = ${c2 * 10} 毫米 + ${m2} 毫米 = <span class="text-rose-600">${totalMm2} 毫米</span>
+              </div>
+              <p class="text-xs text-slate-500 font-medium">統一變換為毫米，做單純的整數加減計算。</p>
+            </div>
+          `;
+        }
+
+        if (cardsHtml === '') {
+          cardsHtml = `
+            <div class="bg-white p-3.5 rounded-xl border border-amber-200 shadow-sm text-center">
+              <p class="text-sm font-bold text-slate-700">
+                原本兩項就都是「毫米」：<span class="text-rose-600 font-black">${totalMm1} 毫米</span> 與 <span class="text-rose-600 font-black">${totalMm2} 毫米</span>，直接相${op === '+' ? '加' : '減'}！
+              </p>
+            </div>
+          `;
+        }
+
+        container.innerHTML = cardsHtml;
+      }
+    }
+
+    /* -------------------------------------------------------------
+     * 11. 步驟三：動態直式紀錄板 (嚴格對標教育部課本複合式單位紀錄格式)
+     * ------------------------------------------------------------- */
+    function renderCalculationSlate(prob, strategy) {
+      const board = document.getElementById('calculationBoard');
+      const tag = document.getElementById('currentCalcMethodTag');
+
+      const { c1, m1, totalMm1, c2, m2, totalMm2, operator: op } = prob;
+
+      // 預先計算正確數值
+      const totalResultMm = (op === '+') ? (totalMm1 + totalMm2) : (totalMm1 - totalMm2);
+      const ansCm = Math.floor(totalResultMm / 10);
+      const ansMm = totalResultMm % 10;
+
+      if (strategy === 'compound') {
+        tag.textContent = "📐 複合式單位紀錄格式 (課本標準)";
+        tag.className = "text-xs bg-blue-100 text-blue-800 font-black px-2.5 py-1 rounded-lg border border-blue-300";
+
+        // 判斷是否進位或借位
+        const isAddition = (op === '+');
+        const sumM = m1 + m2;
+        const sumC = c1 + c2;
+        const hasCarry = isAddition && (sumM >= 10);
+        const hasBorrow = (!isAddition) && (m1 < m2);
+
+        // 組合橫式字串
+        const horizontalFormula = `
+          <div class="text-center font-bold text-base md:text-lg text-slate-800 mb-5 bg-amber-50/70 py-2.5 px-4 rounded-xl border border-amber-200">
+            <span class="text-slate-500 text-xs block mb-1">【橫式紀錄】</span>
+            <span class="text-blue-700 font-black">${c1}</span> 公分 <span class="text-rose-700 font-black">${m1}</span> 毫米 
+            <span class="text-amber-600 font-black px-1">${op}</span> 
+            <span class="text-blue-700 font-black">${c2}</span> 公分 <span class="text-rose-700 font-black">${m2}</span> 毫米 
+            = <span class="text-rose-600 font-black border-b-2 border-rose-500 px-1">${ansCm}</span> 公分 <span class="text-rose-600 font-black border-b-2 border-rose-500 px-1">${ansMm}</span> 毫米
+          </div>
+        `;
+
+        let verticalSlateContent = '';
+        let stepGuideHtml = '';
+
+        if (hasCarry) {
+          // ========================================================
+          // 加法進位 (課本標準：算出來是多少先寫多少，再劃掉進位！)
+          // ========================================================
+          const carry = Math.floor(sumM / 10);
+          const restM = sumM % 10;
+
+          verticalSlateContent = `
+            <!-- 欄位標籤 -->
+            <div class="grid grid-cols-2 text-center text-sm font-bold text-slate-500 border-b-2 border-slate-200 pb-1 mb-2">
+              <span>公分</span>
+              <span>毫米</span>
+            </div>
+
+            <!-- 第一列 (被加數) -->
+            <div class="grid grid-cols-2 text-center font-black text-slate-800 text-xl py-0.5">
+              <span>${c1}</span>
+              <span>${m1}</span>
+            </div>
+
+            <!-- 第二列 (加數 + 符號) -->
+            <div class="grid grid-cols-2 text-center font-black text-slate-800 text-xl py-0.5 border-b-2 border-slate-800 pb-1 relative">
+              <span class="absolute left-1 top-0 text-slate-600 font-black text-lg">+</span>
+              <span>${c2}</span>
+              <span>${m2}</span>
+            </div>
+
+            <!-- 中間計算列：算出來是多少就先寫多少，再劃掉！ -->
+            <div class="grid grid-cols-2 text-center font-black text-xl py-1 items-center">
+              <div>
+                <span class="strikethrough-diag text-slate-500">${sumC}</span>
+              </div>
+              <div>
+                <span class="strikethrough-diag text-slate-500">${sumM}</span>
+              </div>
+            </div>
+
+            <!-- 最終改寫答案列：滿10進位後的數字 (課本紅框方塊格式，直接寫在劃掉數字下方，無多餘橫線) -->
+            <div class="grid grid-cols-2 text-center font-black text-2xl pt-1">
+              <div>
+                <span class="text-rose-600 border-2 border-rose-400 bg-white rounded-lg px-2.5 py-0.5 shadow-sm inline-block">${ansCm}</span>
+              </div>
+              <div>
+                <span class="text-rose-600 border-2 border-rose-400 bg-white rounded-lg px-2.5 py-0.5 shadow-sm inline-block">${ansMm}</span>
+              </div>
+            </div>
+          `;
+
+          stepGuideHtml = `
+            <div class="space-y-3 text-sm text-slate-700">
+              <!-- 課本原汁原味指向框 (Image 2) -->
+              <div class="bg-white p-3 rounded-2xl border-2 border-slate-300 text-sm font-bold text-slate-800 flex items-center justify-center gap-1 shadow-sm">
+                <span>${sumM} 毫米是</span>
+                <span class="text-rose-600 border border-rose-400 bg-rose-50 px-2 py-0.5 rounded font-black">${carry}</span>
+                <span>公分</span>
+                <span class="text-rose-600 border border-rose-400 bg-rose-50 px-2 py-0.5 rounded font-black">${restM}</span>
+                <span>毫米。</span>
+              </div>
+
+              <div class="text-xs text-slate-600 bg-amber-50 p-3 rounded-xl border border-amber-200 leading-relaxed font-medium">
+                💡 <strong>小學三年級課本規範步驟：</strong><br>
+                ① 毫米相加得 <strong>${sumM}</strong>、公分相加得 <strong>${sumC}</strong>，先寫在橫線下方。<br>
+                ② 滿 10 毫米換成 1 公分：把 <strong>${sumM} 劃掉</strong>，下方改寫 <strong>${restM}</strong> 毫米。<br>
+                ③ 把公分欄的 <strong>${sumC} 劃掉</strong>，加上進位的 1 公分，下方改寫 <strong>${ansCm}</strong> 公分！
+              </div>
+
+              <div class="pt-2 border-t border-slate-200 font-extrabold text-base text-slate-800">
+                答：<span class="text-rose-600 underline underline-offset-4 decoration-2">${ansCm} 公分 ${ansMm} 毫米</span>
+              </div>
+            </div>
+          `;
+
+        } else if (hasBorrow) {
+          // ========================================================
+          // 減法借位 (向公分借 1 當 10，公分劃掉)
+          // ========================================================
+          verticalSlateContent = `
+            <!-- 欄位標籤 -->
+            <div class="grid grid-cols-2 text-center text-sm font-bold text-slate-500 border-b-2 border-slate-200 pb-1 mb-1">
+              <span>公分</span>
+              <span>毫米</span>
+            </div>
+
+            <!-- 借位指示列 -->
+            <div class="grid grid-cols-2 text-center text-xs font-black h-6 items-center">
+              <div><span class="bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded border border-rose-300 font-black">${c1 - 1}</span></div>
+              <div><span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded border border-amber-300 font-black">+10</span></div>
+            </div>
+
+            <!-- 第一列 (被減數被劃掉) -->
+            <div class="grid grid-cols-2 text-center font-black text-slate-800 text-xl py-0.5">
+              <span class="strikethrough-diag text-slate-400">${c1}</span>
+              <span class="text-rose-600 font-black">${m1}</span>
+            </div>
+
+            <!-- 第二列 (減數 + 符號) -->
+            <div class="grid grid-cols-2 text-center font-black text-slate-800 text-xl py-0.5 border-b-4 border-slate-800 pb-1 relative">
+              <span class="absolute left-1 top-0 text-slate-600 font-black text-lg">-</span>
+              <span>${c2}</span>
+              <span>${m2}</span>
+            </div>
+
+            <!-- 結果列 -->
+            <div class="grid grid-cols-2 text-center font-black pt-2 text-2xl">
+              <div><span class="text-blue-600 border-2 border-blue-400 bg-blue-50 rounded-lg px-2.5 py-0.5 shadow-sm inline-block">${ansCm}</span></div>
+              <div><span class="text-rose-600 border-2 border-rose-400 bg-rose-50 rounded-lg px-2.5 py-0.5 shadow-sm inline-block">${ansMm}</span></div>
+            </div>
+          `;
+
+          stepGuideHtml = `
+            <div class="space-y-2 text-sm text-slate-700">
+              <div class="text-xs font-bold text-rose-600 bg-rose-50 p-2 rounded-xl border border-rose-200 leading-relaxed">
+                ⚠️ 先看毫米：${m1} 毫米不夠減 ${m2} 毫米！<br>
+                向 ${c1} 公分借 1 公分換成 10 毫米 (公分剩 ${c1 - 1})
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold">毫米相減：</span>
+                <span>10 + ${m1} - ${m2} = <strong class="text-rose-600 border border-rose-300 bg-rose-50 px-2 py-0.5 rounded">${ansMm}</strong></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold">公分相減：</span>
+                <span>${c1 - 1} - ${c2} = <strong class="text-blue-600 border border-blue-300 bg-blue-50 px-2 py-0.5 rounded">${ansCm}</strong></span>
+              </div>
+              <div class="pt-2 border-t border-slate-200 font-extrabold text-sm text-slate-800">
+                答：<span class="text-rose-600 underline underline-offset-4 decoration-2">${ansCm} 公分 ${ansMm} 毫米</span>
+              </div>
+            </div>
+          `;
+
+        } else {
+          // ========================================================
+          // 不進位、不借位 (直接相加或相減)
+          // ========================================================
+          verticalSlateContent = `
+            <!-- 欄位標籤 -->
+            <div class="grid grid-cols-2 text-center text-sm font-bold text-slate-500 border-b-2 border-slate-200 pb-1 mb-2">
+              <span>公分</span>
+              <span>毫米</span>
+            </div>
+
+            <!-- 第一列 -->
+            <div class="grid grid-cols-2 text-center font-black text-slate-800 text-xl py-0.5">
+              <span>${c1}</span>
+              <span>${m1}</span>
+            </div>
+
+            <!-- 第二列 -->
+            <div class="grid grid-cols-2 text-center font-black text-slate-800 text-xl py-0.5 border-b-4 border-slate-800 pb-1 relative">
+              <span class="absolute left-1 top-0 text-slate-600 font-black text-lg">${op}</span>
+              <span>${c2}</span>
+              <span>${m2}</span>
+            </div>
+
+            <!-- 結果列 -->
+            <div class="grid grid-cols-2 text-center font-black pt-2 text-2xl">
+              <div><span class="text-blue-600 border-2 border-blue-400 bg-blue-50 rounded-lg px-2.5 py-0.5 shadow-sm inline-block">${ansCm}</span></div>
+              <div><span class="text-rose-600 border-2 border-rose-400 bg-rose-50 rounded-lg px-2.5 py-0.5 shadow-sm inline-block">${ansMm}</span></div>
+            </div>
+          `;
+
+          stepGuideHtml = `
+            <div class="space-y-3 text-sm text-slate-700">
+              <div class="flex items-center gap-2">
+                <span class="font-bold">先算有幾毫米：</span>
+                <span>${m1} ${op} ${m2} = </span>
+                <span class="font-black text-rose-600 border-2 border-rose-400 bg-rose-50 px-2.5 py-0.5 rounded-lg shadow-sm">${ansMm}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold">再算有幾公分：</span>
+                <span>${c1} ${op} ${c2} = </span>
+                <span class="font-black text-blue-600 border-2 border-blue-400 bg-blue-50 px-2.5 py-0.5 rounded-lg shadow-sm">${ansCm}</span>
+              </div>
+              <div class="pt-2 border-t border-slate-200 font-extrabold text-sm text-slate-800">
+                答：<span class="text-rose-600 underline underline-offset-4 decoration-2">${ansCm} 公分 ${ansMm} 毫米</span>
+              </div>
+            </div>
+          `;
+        }
+
+        board.innerHTML = `
+          ${horizontalFormula}
+          
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center w-full max-w-xl mx-auto">
+            <!-- 左側：複合式單位直式 (公分 毫米 分欄) -->
+            <div class="md:col-span-5 bg-slate-50/80 p-4 rounded-2xl border-2 border-slate-300 shadow-sm font-mono">
+              ${verticalSlateContent}
+            </div>
+
+            <!-- 連接箭頭 -->
+            <div class="hidden md:flex md:col-span-1 justify-center text-slate-300 text-2xl font-bold">
+              ➔
+            </div>
+
+            <!-- 右側：課本式引導框 -->
+            <div class="md:col-span-6 bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 shadow-sm">
+              <span class="text-xs font-bold text-slate-400 block mb-2">【思考與計算步驟】</span>
+              ${stepGuideHtml}
+            </div>
+          </div>
+        `;
+
+      } else {
+        // 單一單位法
+        tag.textContent = "⚡ 單一單位紀錄格式 (全換毫米)";
+        tag.className = "text-xs bg-amber-100 text-amber-800 font-black px-2.5 py-1 rounded-lg border border-amber-300";
+
+        const horizontalFormula = `
+          <div class="text-center font-bold text-base md:text-lg text-slate-800 mb-5 bg-amber-50/70 py-2.5 px-4 rounded-xl border border-amber-200">
+            <span class="text-slate-500 text-xs block mb-1">【橫式紀錄】</span>
+            <span class="text-rose-700 font-black">${totalMm1}</span> 毫米 
+            <span class="text-amber-600 font-black px-1">${op}</span> 
+            <span class="text-rose-700 font-black">${totalMm2}</span> 毫米 
+            = <span class="text-rose-600 font-black border-b-2 border-rose-500 px-1">${totalResultMm}</span> 毫米
+          </div>
+        `;
+
+        board.innerHTML = `
+          ${horizontalFormula}
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center w-full max-w-xl mx-auto">
+            <!-- 左側：純毫米直式 -->
+            <div class="md:col-span-5 bg-slate-50/80 p-4 rounded-2xl border-2 border-slate-300 shadow-sm font-mono text-center">
+              <div class="text-xs font-bold text-slate-500 border-b-2 border-slate-200 pb-1 mb-2">
+                毫米 (mm)
+              </div>
+              <div class="text-right text-xl font-black text-slate-800 pr-4 py-0.5">
+                ${totalMm1}
+              </div>
+              <div class="text-right text-xl font-black text-slate-800 pr-4 py-0.5 border-b-4 border-slate-800 pb-1 relative">
+                <span class="absolute left-2 top-0 text-slate-600 font-black">${op}</span>
+                ${totalMm2}
+              </div>
+              <div class="text-right text-2xl font-black text-rose-600 pr-4 pt-2">
+                ${totalResultMm}
+              </div>
+            </div>
+
+            <!-- 連接箭頭 -->
+            <div class="hidden md:flex md:col-span-1 justify-center text-slate-300 text-2xl font-bold">
+              ➔
+            </div>
+
+            <!-- 右側：引導與換算框 -->
+            <div class="md:col-span-6 bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 shadow-sm space-y-2.5 text-sm text-slate-700">
+              <span class="text-xs font-bold text-slate-400 block mb-1">【思考與計算步驟】</span>
+              <div class="flex items-center gap-2">
+                <span class="font-bold">全部有幾毫米：</span>
+                <span class="font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">${totalMm1} ${op} ${totalMm2} = ${totalResultMm}</span>
+              </div>
+              <div class="bg-amber-50 p-2.5 rounded-lg border border-amber-200 text-xs">
+                <span class="font-bold text-amber-900 block mb-1">將答案換算成公分毫米：</span>
+                ${totalResultMm} 毫米 = ${ansCm * 10} 毫米 + ${ansMm} 毫米<br>
+                = <strong class="text-blue-700">${ansCm} 公分</strong> <strong class="text-rose-700">${ansMm} 毫米</strong>
+              </div>
+              <div class="pt-2 border-t border-slate-200 font-extrabold text-sm text-slate-800">
+                答：<span class="text-rose-600 underline underline-offset-4 decoration-2">${ansCm} 公分 ${ansMm} 毫米</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    /* -------------------------------------------------------------
+     * 12. 渲染學生最終答案輸入框 (依策略順應學生思考流)
+     * ------------------------------------------------------------- */
+    function renderAnswerInputs(prob, strategy = 'compound') {
+      const container = document.getElementById('answerInputGroup');
+      container.innerHTML = '';
+
+      if (prob.answerType === 'both_required') {
+        if (strategy === 'compound') {
+          // 學生選擇複合單位直式法：先直式得到幾公分幾毫米，再換算成幾毫米！
+          container.innerHTML = `
+            <span class="font-bold text-slate-700 text-xs md:text-sm">先得到：</span>
+            <input type="number" id="inputCm" placeholder="公分" class="w-14 px-2 py-1 text-center font-bold border-2 border-amber-300 rounded-lg text-lg focus:outline-none focus:border-amber-500 bg-white">
+            <span class="font-bold text-slate-700 text-xs md:text-sm">公分</span>
+            <input type="number" id="inputRestMm" placeholder="毫米" class="w-14 px-2 py-1 text-center font-bold border-2 border-amber-300 rounded-lg text-lg focus:outline-none focus:border-amber-500 bg-white">
+            <span class="font-bold text-slate-700 text-xs md:text-sm">毫米，再換算成</span>
+            <input type="number" id="inputMm" placeholder="全部" class="w-16 px-2 py-1 text-center font-bold border-2 border-amber-300 rounded-lg text-lg focus:outline-none focus:border-amber-500 bg-white">
+            <span class="font-bold text-slate-700 text-xs md:text-sm">毫米</span>
+          `;
+        } else {
+          // 學生選擇單一單位法：先算出全部幾毫米，再換算成幾公分幾毫米！
+          container.innerHTML = `
+            <span class="font-bold text-slate-700 text-xs md:text-sm">先得到：</span>
+            <input type="number" id="inputMm" placeholder="全部" class="w-16 px-2 py-1 text-center font-bold border-2 border-amber-300 rounded-lg text-lg focus:outline-none focus:border-amber-500 bg-white">
+            <span class="font-bold text-slate-700 text-xs md:text-sm">毫米，再換算成</span>
+            <input type="number" id="inputCm" placeholder="公分" class="w-14 px-2 py-1 text-center font-bold border-2 border-amber-300 rounded-lg text-lg focus:outline-none focus:border-amber-500 bg-white">
+            <span class="font-bold text-slate-700 text-xs md:text-sm">公分</span>
+            <input type="number" id="inputRestMm" placeholder="毫米" class="w-14 px-2 py-1 text-center font-bold border-2 border-amber-300 rounded-lg text-lg focus:outline-none focus:border-amber-500 bg-white">
+            <span class="font-bold text-slate-700 text-xs md:text-sm">毫米</span>
+          `;
+        }
+      } else {
+        container.innerHTML = `
+          <input type="number" id="inputCm" placeholder="公分" class="w-16 px-2 py-1 text-center font-bold border-2 border-amber-300 rounded-lg text-lg focus:outline-none focus:border-amber-500 bg-white">
+          <span class="font-bold text-slate-700 text-sm">公分</span>
+          <input type="number" id="inputRestMm" placeholder="毫米" class="w-16 px-2 py-1 text-center font-bold border-2 border-amber-300 rounded-lg text-lg focus:outline-none focus:border-amber-500 bg-white">
+          <span class="font-bold text-slate-700 text-sm">毫米</span>
+        `;
+      }
+    }
+
+    /* -------------------------------------------------------------
+     * 13. 答案驗證與過關結算
+     * ------------------------------------------------------------- */
+    function checkFinalAnswer() {
+      if (!selectedStrategy) {
+        alert("💡 請先在【步驟一】點選你想要的計算策略喔！");
+        return;
+      }
+
+      const prob = currentProblem;
+      const { totalMm1, totalMm2, operator: op } = prob;
+      const totalResultMm = (op === '+') ? (totalMm1 + totalMm2) : (totalMm1 - totalMm2);
+      const expectedCm = Math.floor(totalResultMm / 10);
+      const expectedMm = totalResultMm % 10;
+
+      const inputCm = document.getElementById('inputCm');
+      const inputRestMm = document.getElementById('inputRestMm');
+      const inputMm = document.getElementById('inputMm');
+
+      const userCm = inputCm ? parseInt(inputCm.value, 10) : NaN;
+      const userRestMm = inputRestMm ? parseInt(inputRestMm.value, 10) : NaN;
+      const userMm = inputMm ? parseInt(inputMm.value, 10) : NaN;
+
+      let isCorrect = false;
+
+      if (prob.answerType === 'both_required') {
+        if (userMm === totalResultMm && userCm === expectedCm && userRestMm === expectedMm) {
+          isCorrect = true;
+        }
+      } else {
+        if (userCm === expectedCm && userRestMm === expectedMm) {
+          isCorrect = true;
+        }
+      }
+
+      if (isCorrect) {
+        playSound('correct');
+        triggerConfetti();
+
+        if (!isEndlessMode) {
+          if (!completedLevels.has(currentLevelIndex)) {
+            completedLevels.add(currentLevelIndex);
+            totalStars += 3;
+            document.getElementById('starScore').textContent = totalStars;
+          }
+          renderLevelButtons();
+        } else {
+          totalStars += 1;
+          document.getElementById('starScore').textContent = totalStars;
+        }
+
+        showSolutionNotebook(prob, expectedCm, expectedMm, totalResultMm);
+
+      } else {
+        playSound('wrong');
+        alert("💡 答案不太對喔！請檢查一下是不是進位或借位算錯了？參考直式算式再試一次！");
+      }
+    }
+
+    function showSolutionNotebook(prob, ansCm, ansMm, totalResultMm) {
+      const note = document.getElementById('solutionNotebook');
+      const content = document.getElementById('notebookContent');
+      note.classList.remove('hidden');
+      note.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      const isCompound = (selectedStrategy === 'compound');
+
+      content.innerHTML = `
+        <div class="bg-white/90 p-3 rounded-xl border border-amber-200 space-y-2">
+          <p class="font-bold text-slate-800 text-sm md:text-base">
+            ✔ 題目算式：${prob.origFormat1 || prob.origFormat || (prob.c1 + '公分' + prob.m1 + '毫米')} ${prob.operator} ${prob.origFormat2 || (prob.c2 + '公分' + prob.m2 + '毫米')}
+          </p>
+          <div class="text-xs text-slate-600 bg-amber-50 p-2.5 rounded-lg border border-amber-200 leading-relaxed font-medium">
+            ${isCompound ? `
+              • <strong>【複合單位直式法】思考與換算順序：</strong><br>
+              ① 直式分欄對齊計算，先得到 <strong>${ansCm} 公分 ${ansMm} 毫米</strong>。<br>
+              ${prob.answerType === 'both_required' ? `② 題目要回答毫米，再進行換算：${ansCm} 公分 ${ansMm} 毫米 ＝ ${ansCm * 10} 毫米 ＋ ${ansMm} 毫米 ＝ <strong>${totalResultMm} 毫米</strong>。` : ''}
+            ` : `
+              • <strong>【單一單位法】思考與換算順序：</strong><br>
+              ① 全部換為毫米計算，先得到 <strong>${totalResultMm} 毫米</strong>。<br>
+              ② 再換算成公分毫米：${totalResultMm} 毫米 ＝ <strong>${ansCm} 公分 ${ansMm} 毫米</strong>。
+            `}
+          </div>
+          <p class="text-sm font-black text-rose-600 pt-1 border-t border-amber-100">
+            答：${isCompound ? (prob.answerType === 'both_required' ? `${ansCm} 公分 ${ansMm} 毫米，再換算成 ${totalResultMm} 毫米` : `${ansCm} 公分 ${ansMm} 毫米`) : (prob.answerType === 'both_required' ? `${totalResultMm} 毫米，也可以說是 ${ansCm} 公分 ${ansMm} 毫米` : `${ansCm} 公分 ${ansMm} 毫米`)}
+          </p>
+        </div>
+      `;
+    }
+
+    /* -------------------------------------------------------------
+     * 14. 虛擬直尺實驗室
+     * ------------------------------------------------------------- */
+    function updateRulerLab(val) {
+      val = Math.max(0, Math.min(150, parseInt(val, 10) || 0));
+      document.getElementById('rulerRange').value = val;
+      document.getElementById('rulerNumberInput').value = val;
+
+      document.getElementById('labSingleUnit').innerHTML = `
+        ${val} <span class="text-base text-slate-600 font-bold">毫米 (mm)</span>
+      `;
+
+      const cm = Math.floor(val / 10);
+      const mm = val % 10;
+      document.getElementById('labCompoundUnit').innerHTML = `
+        ${cm} <span class="text-base text-slate-600 font-bold">公分</span> ${mm} <span class="text-base text-slate-600 font-bold">毫米</span>
+      `;
+
+      drawInteractiveRuler();
+    }
+
+    function drawInteractiveRuler() {
+      const container = document.getElementById('interactiveRuler');
+      const totalMm = parseInt(document.getElementById('rulerRange').value, 10) || 48;
+      
+      const width = 800;
+      const height = 80;
+      const mmWidth = width / 150;
+
+      let ticks = '';
+      for (let i = 0; i <= 150; i++) {
+        const x = i * mmWidth + 20;
+        if (i % 10 === 0) {
+          const cmVal = i / 10;
+          ticks += `
+            <line x1="${x}" y1="20" x2="${x}" y2="55" stroke="#78350f" stroke-width="2.5"/>
+            <text x="${x}" y="70" text-anchor="middle" font-size="12" font-weight="900" fill="#78350f">${cmVal}</text>
+          `;
+        } else if (i % 5 === 0) {
+          ticks += `<line x1="${x}" y1="20" x2="${x}" y2="45" stroke="#92400e" stroke-width="1.8"/>`;
+        } else {
+          ticks += `<line x1="${x}" y1="20" x2="${x}" y2="35" stroke="#b45309" stroke-width="1"/>`;
+        }
+      }
+
+      const currentX = totalMm * mmWidth + 20;
+      const pointer = `
+        <rect x="20" y="20" width="${totalMm * mmWidth}" height="15" fill="#f59e0b" opacity="0.6"/>
+        <polygon points="${currentX-6},5 ${currentX+6},5 ${currentX},18" fill="#dc2626"/>
+        <line x1="${currentX}" y1="5" x2="${currentX}" y2="55" stroke="#dc2626" stroke-width="2" stroke-dasharray="2,2"/>
+      `;
+
+      container.innerHTML = `
+        <div style="min-width: 840px;">
+          <svg width="840" height="${height}" viewBox="0 0 840 ${height}">
+            ${ticks}
+            ${pointer}
+          </svg>
+        </div>
+      `;
+    }
+
+    /* -------------------------------------------------------------
+     * 15. 無限隨機題目生成器
+     * ------------------------------------------------------------- */
+    function generateRandomProblem() {
+      playSound('click');
+      isEndlessMode = true;
+
+      const mode = Math.floor(Math.random() * 3);
+      let randProb = null;
+
+      if (mode === 0) {
+        // 複合加法
+        const c1 = Math.floor(Math.random() * 8) + 2;
+        const m1 = Math.floor(Math.random() * 10);
+        const c2 = Math.floor(Math.random() * 6) + 1;
+        const m2 = Math.floor(Math.random() * 10);
+        const isCarry = (m1 + m2 >= 10);
+
+        randProb = {
+          id: "練功",
+          title: `隨機挑戰：長度相加 (${isCarry ? '滿10進位題' : '不進位題'})`,
+          tag: isCarry ? "複合加法 (滿10進位)" : "複合加法 (不進位)",
+          story: `小松鼠撿到兩根樹枝，第一根長 <span class='text-amber-800 font-black'>${c1}公分${m1}毫米</span>，第二根長 <span class='text-amber-800 font-black'>${c2}公分${m2}毫米</span>。<br>兩根樹枝合起來一共長幾公分幾毫米？`,
+          helper: isCarry ? "注意：毫米相加滿10毫米囉！要記得向公分進位喔！" : "公分對齊公分、毫米對齊毫米直接相加！",
+          diagram: "tree_branch",
+          c1: c1, m1: m1, totalMm1: c1 * 10 + m1, origFormat1: `${c1}公分${m1}毫米`,
+          c2: c2, m2: m2, totalMm2: c2 * 10 + m2, origFormat2: `${c2}公分${m2}毫米`,
+          operator: "+",
+          recommendedStrategy: "compound",
+          strategyRationale: "兩者都是幾公分幾毫米，推薦使用複合單位直式記錄！",
+          answerType: "cm_mm"
+        };
+      } else if (mode === 1) {
+        // 複合減法
+        const c1 = Math.floor(Math.random() * 8) + 6;
+        const m1 = Math.floor(Math.random() * 6);
+        const c2 = Math.floor(Math.random() * 4) + 1;
+        const m2 = Math.floor(Math.random() * 6) + 4;
+        const isBorrow = (m1 < m2);
+
+        randProb = {
+          id: "練功",
+          title: `隨機挑戰：長度相減 (${isBorrow ? '借位挑戰題' : '不借位題'})`,
+          tag: isBorrow ? "複合減法 (借1當10)" : "複合減法 (不借位)",
+          story: `有一條紙膠帶長 <span class='text-purple-700 font-black'>${c1}公分${m1}毫米</span>，做美勞用掉了 <span class='text-purple-700 font-black'>${c2}公分${m2}毫米</span>。<br>還剩下幾公分幾毫米？`,
+          helper: isBorrow ? "毫米不夠減時，要向公分借 1 公分換成 10 毫米喔！" : "公分與毫米各自相減即可！",
+          diagram: "tape",
+          c1: c1, m1: m1, totalMm1: c1 * 10 + m1, origFormat1: `${c1}公分${m1}毫米`,
+          c2: c2, m2: m2, totalMm2: c2 * 10 + m2, origFormat2: `${c2}公分${m2}毫米`,
+          operator: "-",
+          recommendedStrategy: "compound",
+          strategyRationale: "使用複合單位直式記錄，不夠減時向公分借位！",
+          answerType: "cm_mm"
+        };
+      } else {
+        // 純毫米題目
+        const mm1 = Math.floor(Math.random() * 40) + 30;
+        const mm2 = Math.floor(Math.random() * 30) + 15;
+
+        randProb = {
+          id: "練功",
+          title: "隨機挑戰：純毫米加法與雙單位換算",
+          tag: "單一單位 ⇄ 複合單位",
+          story: `小螞蟻上午走了 <span class='text-rose-600 font-black'>${mm1} 毫米</span>，下午走了 <span class='text-blue-600 font-black'>${mm2} 毫米</span>。<br>一共走了幾毫米？也可以說是幾公分幾毫米？`,
+          helper: "可以先算總毫米，也可以先換算成公分毫米列直式！",
+          diagram: "ant_walk",
+          c1: Math.floor(mm1 / 10), m1: mm1 % 10, totalMm1: mm1, origFormat1: `${mm1}毫米`,
+          c2: Math.floor(mm2 / 10), m2: mm2 % 10, totalMm2: mm2, origFormat2: `${mm2}毫米`,
+          operator: "+",
+          recommendedStrategy: "single",
+          strategyRationale: "純毫米加法，單一單位或複合單位直式都可精確解答！",
+          answerType: "both_required"
+        };
+      }
+
+      currentProblem = randProb;
+      const targetContainer = document.getElementById('endlessProblemContainer');
+      const gamePlayCard = document.getElementById('gamePlayCard');
+      targetContainer.innerHTML = '';
+      targetContainer.appendChild(gamePlayCard);
+
+      loadProblemIntoUI(currentProblem);
+    }
+
+    // 確保回到冒險模式時 card 回到正確位置
+    const originalSwitchTab = switchTab;
+    switchTab = function(tabId) {
+      if (tabId === 'adventure') {
+        const advSec = document.getElementById('adventureSection');
+        const gamePlayCard = document.getElementById('gamePlayCard');
+        if (!advSec.contains(gamePlayCard)) {
+          advSec.appendChild(gamePlayCard);
+        }
+        selectLevel(currentLevelIndex);
+      }
+      originalSwitchTab(tabId);
+    };
+
+    /* -------------------------------------------------------------
+     * 16. 初始化啟動
+     * ------------------------------------------------------------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      renderLevelButtons();
+      loadProblemIntoUI(textbookLevels[0]);
+      updateRulerLab(48);
+    });
+  </script>
+</body>
+</html>
