@@ -1064,7 +1064,7 @@
 
       // 自動聚焦步驟二換算框（若需換算）或步驟三直式框
       setTimeout(() => {
-        const firstConv = document.getElementById('convPart1') || document.getElementById('convTotal1') || document.getElementById('convCm1');
+        const firstConv = document.getElementById('convTotal1') || document.getElementById('convCm1');
         if (firstConv) {
           firstConv.focus();
         } else {
@@ -1185,19 +1185,14 @@
                 <span class="font-bold text-sm text-amber-900">將 ${orig1} 換算成純毫米：</span>
                 <span id="convCardBadge1" class="hidden text-xs font-black text-emerald-600 bg-emerald-100 px-2.5 py-0.5 rounded-full ml-auto animate-bounce-once">✔ 換算正確！</span>
               </div>
-              <div class="bg-amber-50/80 text-amber-900 font-bold py-2.5 px-3 rounded-xl border border-amber-200 my-1 flex flex-wrap items-center justify-center gap-1.5 text-sm md:text-base">
+              <div class="bg-amber-50/80 text-amber-900 font-bold py-2.5 px-3 rounded-xl border border-amber-200 my-1 flex flex-wrap items-center justify-center gap-2 text-base md:text-lg">
                 <span class="font-black text-slate-800">${c1} 公分 ${m1} 毫米</span>
                 <span>＝</span>
-                <input type="number" id="convPart1" min="0" placeholder="幾" oninput="onConversionInputChanged(1)" onkeydown="handleConvKey(event, 1, 'part')"
-                       class="w-16 h-10 text-center font-black text-base text-amber-800 border-2 border-amber-400 bg-white rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-amber-200 transition-all">
-                <span>毫米 ＋</span>
-                <span class="font-bold text-rose-700">${m1}</span>
-                <span>毫米 ＝</span>
-                <input type="number" id="convTotal1" min="0" placeholder="全部" oninput="onConversionInputChanged(1)" onkeydown="handleConvKey(event, 1, 'total')"
-                       class="w-20 h-10 text-center font-black text-xl text-rose-600 border-2 border-rose-400 bg-white rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-rose-200 transition-all">
+                <input type="number" id="convTotal1" min="0" placeholder="幾" oninput="onConversionInputChanged(1)" onkeydown="handleConvKey(event, 1, 'total')"
+                       class="w-24 h-11 text-center font-black text-xl text-rose-600 border-2 border-rose-400 bg-white rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-rose-200 transition-all">
                 <span>毫米</span>
               </div>
-              <p class="text-xs text-slate-500 font-medium mt-1">💡 1 公分 ＝ 10 毫米，所以 ${c1} 公分是 <strong>${c1 * 10}</strong> 毫米。</p>
+              <p class="text-xs text-slate-500 font-medium mt-1">💡 1 公分 ＝ 10 毫米，所以 ${c1} 公分 ${m1} 毫米直接換算就是 <strong>${totalMm1}</strong> 毫米。</p>
             </div>
           `;
         }
@@ -1210,19 +1205,14 @@
                 <span class="font-bold text-sm text-amber-900">將 ${orig2} 換算成純毫米：</span>
                 <span id="convCardBadge2" class="hidden text-xs font-black text-emerald-600 bg-emerald-100 px-2.5 py-0.5 rounded-full ml-auto animate-bounce-once">✔ 換算正確！</span>
               </div>
-              <div class="bg-amber-50/80 text-amber-900 font-bold py-2.5 px-3 rounded-xl border border-amber-200 my-1 flex flex-wrap items-center justify-center gap-1.5 text-sm md:text-base">
+              <div class="bg-amber-50/80 text-amber-900 font-bold py-2.5 px-3 rounded-xl border border-amber-200 my-1 flex flex-wrap items-center justify-center gap-2 text-base md:text-lg">
                 <span class="font-black text-slate-800">${c2} 公分 ${m2} 毫米</span>
                 <span>＝</span>
-                <input type="number" id="convPart2" min="0" placeholder="幾" oninput="onConversionInputChanged(2)" onkeydown="handleConvKey(event, 2, 'part')"
-                       class="w-16 h-10 text-center font-black text-base text-amber-800 border-2 border-amber-400 bg-white rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-amber-200 transition-all">
-                <span>毫米 ＋</span>
-                <span class="font-bold text-rose-700">${m2}</span>
-                <span>毫米 ＝</span>
-                <input type="number" id="convTotal2" min="0" placeholder="全部" oninput="onConversionInputChanged(2)" onkeydown="handleConvKey(event, 2, 'total')"
-                       class="w-20 h-10 text-center font-black text-xl text-rose-600 border-2 border-rose-400 bg-white rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-rose-200 transition-all">
+                <input type="number" id="convTotal2" min="0" placeholder="幾" oninput="onConversionInputChanged(2)" onkeydown="handleConvKey(event, 2, 'total')"
+                       class="w-24 h-11 text-center font-black text-xl text-rose-600 border-2 border-rose-400 bg-white rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-rose-200 transition-all">
                 <span>毫米</span>
               </div>
-              <p class="text-xs text-slate-500 font-medium mt-1">💡 1 公分 ＝ 10 毫米，所以 ${c2} 公分是 <strong>${c2 * 10}</strong> 毫米。</p>
+              <p class="text-xs text-slate-500 font-medium mt-1">💡 1 公分 ＝ 10 毫米，所以 ${c2} 公分 ${m2} 毫米直接換算就是 <strong>${totalMm2}</strong> 毫米。</p>
             </div>
           `;
         }
@@ -1247,54 +1237,30 @@
     function onConversionInputChanged(index) {
       const prob = currentProblem;
       if (!prob) return;
-      const c = (index === 1) ? prob.c1 : prob.c2;
-      const m = (index === 1) ? prob.m1 : prob.m2;
-      const expectedPart = c * 10;
       const expectedTotal = (index === 1) ? prob.totalMm1 : prob.totalMm2;
 
-      const partInput = document.getElementById(`convPart${index}`);
       const totalInput = document.getElementById(`convTotal${index}`);
       const badge = document.getElementById(`convCardBadge${index}`);
 
-      let partVal = partInput ? parseInt(partInput.value, 10) : NaN;
       let totalVal = totalInput ? parseInt(totalInput.value, 10) : NaN;
 
-      // 若學生直接輸入總毫米且正確，自動幫忙補上公分換算的部分
-      if (totalInput && totalVal === expectedTotal && partInput && isNaN(partVal)) {
-        partInput.value = expectedPart;
-        partVal = expectedPart;
-      }
-
-      // 檢查第一格 (公分換毫米)
-      if (partInput) {
-        if (!isNaN(partVal)) {
-          if (partVal === expectedPart) {
-            partInput.className = "w-16 h-10 text-center font-black text-base text-emerald-800 border-2 border-emerald-500 bg-emerald-50 rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-emerald-200 transition-all";
-          } else {
-            partInput.className = "w-16 h-10 text-center font-black text-base text-rose-700 border-2 border-rose-400 bg-rose-50 rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-rose-200 transition-all";
-          }
-        } else {
-          partInput.className = "w-16 h-10 text-center font-black text-base text-amber-800 border-2 border-amber-400 bg-white rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-amber-200 transition-all";
-        }
-      }
-
-      // 檢查第二格 (全部毫米)
+      // 檢查總毫米
       let isCardComplete = false;
       if (totalInput) {
         if (!isNaN(totalVal)) {
           if (totalVal === expectedTotal) {
-            totalInput.className = "w-20 h-10 text-center font-black text-xl text-emerald-800 border-2 border-emerald-500 bg-emerald-50 rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-emerald-200 transition-all";
+            totalInput.className = "w-24 h-11 text-center font-black text-xl text-emerald-800 border-2 border-emerald-500 bg-emerald-50 rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-emerald-200 transition-all";
             isCardComplete = true;
           } else {
-            totalInput.className = "w-20 h-10 text-center font-black text-xl text-rose-700 border-2 border-rose-400 bg-rose-50 rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-rose-200 transition-all";
+            totalInput.className = "w-24 h-11 text-center font-black text-xl text-rose-700 border-2 border-rose-400 bg-rose-50 rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-rose-200 transition-all";
           }
         } else {
-          totalInput.className = "w-20 h-10 text-center font-black text-xl text-rose-600 border-2 border-rose-400 bg-white rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-rose-200 transition-all";
+          totalInput.className = "w-24 h-11 text-center font-black text-xl text-rose-600 border-2 border-rose-400 bg-white rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-rose-200 transition-all";
         }
       }
 
       if (badge) {
-        if (isCardComplete && (!partInput || parseInt(partInput.value, 10) === expectedPart)) {
+        if (isCardComplete) {
           badge.classList.remove('hidden');
           playSound('click');
         } else {
@@ -1449,7 +1415,7 @@
         const next = document.getElementById(`convTotal${index}`);
         if (next) next.focus();
       } else if (type === 'total') {
-        const nextCard = document.getElementById(`convPart${index + 1}`) || document.getElementById(`convTotal${index + 1}`);
+        const nextCard = document.getElementById(`convTotal${index + 1}`);
         if (nextCard) {
           nextCard.focus();
         } else {
@@ -1467,6 +1433,21 @@
           const nextStep = document.getElementById('inputSumC') || document.getElementById('startBorrowBtn') || document.getElementById('inputCm');
           if (nextStep) nextStep.focus();
         }
+      }
+    }
+
+    function onSingleMmInputChanged() {
+      const inputMm = document.getElementById('inputMm');
+      const label = document.getElementById('labelConvertedMm');
+      if (!inputMm || !label) return;
+      const val = parseInt(inputMm.value, 10);
+      label.textContent = !isNaN(val) ? val : '？';
+    }
+
+    function handleSingleMmKey(event) {
+      if (event.key === 'Enter') {
+        const inputCm = document.getElementById('inputCm');
+        if (inputCm) inputCm.focus();
       }
     }
 
@@ -2057,20 +2038,24 @@
               <span id="slateMm2">${vM2}</span>
             </div>
             <div class="flex justify-end pr-3 pt-2">
-              <input type="number" id="inputMm" min="0" placeholder="總毫米" onkeydown="if(event.key==='Enter') checkFinalAnswer()"
+              <input type="number" id="inputMm" min="0" placeholder="總毫米" oninput="onSingleMmInputChanged()" onkeydown="handleSingleMmKey(event)"
                      class="w-24 h-11 text-center font-black text-2xl text-rose-600 border-2 border-rose-400 bg-white rounded-xl shadow-inner focus:outline-none focus:ring-4 focus:ring-rose-200 transition-all">
             </div>
-            ${prob.answerType === 'both_required' ? `
-              <div class="mt-3 pt-2.5 border-t border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5 bg-amber-50/80 p-2 rounded-xl">
-                <span>再換算成：</span>
-                <input type="number" id="inputCm" min="0" placeholder="公分" onkeydown="if(event.key==='Enter') checkFinalAnswer()"
-                       class="w-14 px-1.5 py-1 text-center font-black text-base text-blue-700 border-2 border-blue-400 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+
+            <!-- 讓學生動手完成換算步驟：如 97 毫米 ＝ [ 9 ] 公分 [ 7 ] 毫米 -->
+            <div class="mt-3 pt-2.5 border-t border-slate-200 text-xs md:text-sm font-bold text-slate-700 bg-amber-50/90 p-2.5 rounded-xl border border-amber-200">
+              <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                <span id="labelConvertedMm" class="font-black text-rose-700 text-base">？</span>
+                <span>毫米 ＝</span>
+                <input type="number" id="inputCm" min="0" placeholder="公分" onkeydown="if(event.key==='Enter') document.getElementById('inputRestMm').focus()"
+                       class="w-14 h-9 text-center font-black text-base text-blue-700 border-2 border-blue-400 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
                 <span>公分</span>
                 <input type="number" id="inputRestMm" min="0" placeholder="毫米" onkeydown="if(event.key==='Enter') checkFinalAnswer()"
-                       class="w-14 px-1.5 py-1 text-center font-black text-base text-rose-600 border-2 border-rose-400 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+                       class="w-14 h-9 text-center font-black text-base text-rose-600 border-2 border-rose-400 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 <span>毫米</span>
               </div>
-            ` : ''}
+              <p class="text-[11px] text-amber-800 font-medium mt-1.5 text-center">💡 每滿 10 毫米為 1 公分，請自己將總毫米換算為幾公分幾毫米！</p>
+            </div>
           `;
 
           const singleGuideFormula = (isDone1 && isDone2) ? `${totalMm1} ${op} ${totalMm2}` : `總毫米 ${op} 總毫米`;
@@ -2082,12 +2067,12 @@
                 <span>單一單位法：全部換成毫米計算！</span>
               </div>
               <div class="text-xs text-slate-600 bg-white p-3 rounded-xl border border-slate-200 leading-relaxed font-medium space-y-1.5">
-                <p>① 先在步驟二將公分毫米換算為純毫米，再進行直式計算：${singleGuideFormula}。</p>
+                <p>① 先在步驟二將公分毫米直接換算為純毫米，再進行直式計算：${singleGuideFormula}。</p>
                 <p>② 將算出的總毫米數填入左側直式答案框。</p>
-                ${prob.answerType === 'both_required' ? '<p>③ 每滿 10 毫米為 1 公分，將答案換算為幾公分幾毫米。</p>' : ''}
+                <p>③ <strong>換算步驟</strong>：每滿 10 毫米為 1 公分，請在下方自己將總毫米換算為幾公分幾毫米（例如：97 毫米 ＝ 9 公分 7 毫米）。</p>
               </div>
               <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 font-bold text-center">
-                ✏️ 動動腦算算看，將答案填入左側直式答案框！
+                ✏️ 算好總毫米並完成公分毫米換算後，點擊「檢查答案」！
               </div>
             </div>
           `;
@@ -2107,6 +2092,12 @@
             <div class="text-right text-2xl font-black text-rose-600 pr-4 pt-2">
               ${totalResultMm}
             </div>
+            <div class="mt-3 pt-2.5 border-t border-slate-200 text-xs md:text-sm font-bold text-slate-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200 text-center">
+              <span class="text-rose-700 font-black text-base">${totalResultMm} 毫米</span>
+              <span>＝</span>
+              <span class="text-blue-700 font-black text-base">${ansCm} 公分</span>
+              <span class="text-rose-700 font-black text-base">${ansMm} 毫米</span>
+            </div>
           `;
 
           stepGuideHtml = `
@@ -2118,11 +2109,11 @@
               </div>
               <div class="bg-amber-50 p-2.5 rounded-lg border border-amber-200 text-xs">
                 <span class="font-bold text-amber-900 block mb-1">將答案換算成公分毫米：</span>
-                ${totalResultMm} 毫米 = ${ansCm * 10} 毫米 + ${ansMm} 毫米<br>
+                <strong class="text-rose-700 font-black">${totalResultMm} 毫米</strong> = ${ansCm * 10} 毫米 + ${ansMm} 毫米<br>
                 = <strong class="text-blue-700">${ansCm} 公分</strong> <strong class="text-rose-700">${ansMm} 毫米</strong>
               </div>
               <div class="pt-2 border-t border-slate-200 font-extrabold text-sm text-slate-800">
-                答：<span class="text-rose-600 underline underline-offset-4 decoration-2">${ansCm} 公分 ${ansMm} 毫米</span>
+                答：<span class="text-rose-600 underline underline-offset-4 decoration-2">${prob.answerType === 'both_required' ? `${totalResultMm} 毫米，也可以說是 ${ansCm} 公分 ${ansMm} 毫米` : `${ansCm} 公分 ${ansMm} 毫米`}</span>
               </div>
             </div>
           `;
@@ -2575,27 +2566,32 @@
         }
 
       } else {
-        // 單一單位法
-        if (prob.answerType === 'both_required') {
-          const inputCm = document.getElementById('inputCm');
-          const inputRestMm = document.getElementById('inputRestMm');
-          userCm = inputCm ? parseInt(inputCm.value, 10) : NaN;
-          userRestMm = inputRestMm ? parseInt(inputRestMm.value, 10) : NaN;
-        }
+        // 單一單位法：學生必須填寫直式總毫米，以及下方自行換算後的公分與毫米
+        const inputCm = document.getElementById('inputCm');
+        const inputRestMm = document.getElementById('inputRestMm');
+        userCm = inputCm ? parseInt(inputCm.value, 10) : NaN;
+        userRestMm = inputRestMm ? parseInt(inputRestMm.value, 10) : NaN;
       }
 
       // 檢查是否漏填
       if (selectedStrategy === 'single') {
-        if (prob.answerType === 'both_required') {
-          if (isNaN(userCm) || isNaN(userRestMm) || isNaN(userMm)) {
-            alert("💡 請將動態算式板中的答案框填寫完整喔！");
-            return;
+        if (isNaN(userMm)) {
+          alert("💡 請先在直式下方填寫相加/相減後的總毫米數喔！");
+          if (inputMm) inputMm.focus();
+          return;
+        }
+        if (isNaN(userCm) || isNaN(userRestMm)) {
+          alert(`💡 請動手完成換算步驟：將 ${userMm} 毫米換算成幾公分幾毫米喔！`);
+          const inputCm = document.getElementById('inputCm');
+          const inputRestMm = document.getElementById('inputRestMm');
+          if (isNaN(userCm) && inputCm) {
+            inputCm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            inputCm.focus();
+          } else if (inputRestMm) {
+            inputRestMm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            inputRestMm.focus();
           }
-        } else {
-          if (isNaN(userMm)) {
-            alert("💡 請在直式下方填寫總毫米數喔！");
-            return;
-          }
+          return;
         }
       } else {
         // compound
@@ -2612,15 +2608,18 @@
       // 驗證答案
       let isCorrect = false;
       if (selectedStrategy === 'single') {
-        if (prob.answerType === 'both_required') {
-          if (userMm === totalResultMm && userCm === expectedCm && userRestMm === expectedMm) {
-            isCorrect = true;
-          }
-        } else {
-          if (userMm === totalResultMm) {
-            isCorrect = true;
-          }
+        if (userMm !== totalResultMm) {
+          alert(`💡 直式計算結果有誤喔，請再檢查一次直式計算！`);
+          if (inputMm) inputMm.focus();
+          return;
         }
+        if (userCm !== expectedCm || userRestMm !== expectedMm) {
+          alert(`💡 換算有誤喔！每 10 毫米是 1 公分，${totalResultMm} 毫米換算成幾公分幾毫米呢？請重新檢查！`);
+          const inputCm = document.getElementById('inputCm');
+          if (inputCm) inputCm.focus();
+          return;
+        }
+        isCorrect = true;
       } else {
         // compound
         if (prob.answerType === 'both_required') {
@@ -2684,16 +2683,27 @@
           <div class="text-xs text-slate-600 bg-amber-50 p-2.5 rounded-lg border border-amber-200 leading-relaxed font-medium">
             ${isCompound ? `
               • <strong>【複合單位直式法】思考與換算順序：</strong><br>
-              ① 直式分欄對齊計算，先得到 <strong>${ansCm} 公分 ${ansMm} 毫米</strong>。<br>
-              ${prob.answerType === 'both_required' ? `② 題目要回答毫米，再進行換算：${ansCm} 公分 ${ansMm} 毫米 ＝ ${ansCm * 10} 毫米 ＋ ${ansMm} 毫米 ＝ <strong>${totalResultMm} 毫米</strong>。` : ''}
+              ${prob.answerType === 'both_required' ? `
+                ① 直式分欄對齊計算，算出 <strong>${ansCm} 公分 ${ansMm} 毫米</strong>。<br>
+                ② 換算為純毫米：${ansCm} 公分 ${ansMm} 毫米 ＝ <strong>${totalResultMm} 毫米</strong>。<br>
+                ③ 依照題目問題順序回答（題目先問幾毫米，就先回答幾毫米）：先答 <strong>${totalResultMm} 毫米</strong>，再答 <strong>${ansCm} 公分 ${ansMm} 毫米</strong>。
+              ` : `
+                ① 直式分欄對齊計算，得到 <strong>${ansCm} 公分 ${ansMm} 毫米</strong>。
+              `}
             ` : `
               • <strong>【單一單位法】思考與換算順序：</strong><br>
-              ① 全部換為毫米計算，先得到 <strong>${totalResultMm} 毫米</strong>。<br>
-              ② 再換算成公分毫米：${totalResultMm} 毫米 ＝ <strong>${ansCm} 公分 ${ansMm} 毫米</strong>。
+              ${prob.answerType === 'both_required' ? `
+                ① 全部換為最小單位「毫米」計算，先得到題目先問的總毫米數：<strong>${totalResultMm} 毫米</strong>。<br>
+                ② 題目接著問也可以說是幾公分幾毫米，再進行換算：${totalResultMm} 毫米 ＝ <strong>${ansCm} 公分 ${ansMm} 毫米</strong>。<br>
+                ③ 依照題目問題順序回答（題目先問幾毫米，就先回答幾毫米）：先答 <strong>${totalResultMm} 毫米</strong>，再答 <strong>${ansCm} 公分 ${ansMm} 毫米</strong>。
+              ` : `
+                ① 全部換為毫米計算，得到 <strong>${totalResultMm} 毫米</strong>。<br>
+                ② 再換算成公分毫米：${totalResultMm} 毫米 ＝ <strong>${ansCm} 公分 ${ansMm} 毫米</strong>。
+              `}
             `}
           </div>
           <p class="text-sm font-black text-rose-600 pt-1 border-t border-amber-100">
-            答：${isCompound ? (prob.answerType === 'both_required' ? `${ansCm} 公分 ${ansMm} 毫米，再換算成 ${totalResultMm} 毫米` : `${ansCm} 公分 ${ansMm} 毫米`) : (prob.answerType === 'both_required' ? `${totalResultMm} 毫米，也可以說是 ${ansCm} 公分 ${ansMm} 毫米` : `${ansCm} 公分 ${ansMm} 毫米`)}
+            答：${prob.answerType === 'both_required' ? `${totalResultMm} 毫米，也可以說是 ${ansCm} 公分 ${ansMm} 毫米` : `${ansCm} 公分 ${ansMm} 毫米`}
           </p>
         </div>
       `;
